@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compteur de Tir - Dark Retro</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+<div class="container">
+  <h1>Compteur de Tir</h1>
+
+  <!-- Ajout Tireur -->
+  <div class="add-tireur-zone">
+    <input type="text" id="tireur-name" placeholder="Nom du tireur">
+    <button id="add-tireur-btn">Ajouter</button>
+  </div>
+
+  <!-- Liste Tireurs -->
+  <ul class="tireurs-list" id="tireurs-ul"></ul>
+
+  <!-- Gestion des séries avancée -->
+  <div class="series-manager-toggle">
+    <button id="toggle-series-manager">⚙️ Gérer les séries</button>
+  </div>
+  <div class="series-manager" id="series-manager">
+    <table id="series-table">
+      <thead>
+        <tr><th>Série</th><th>Gongs</th><th>Temps(s)</th><th>Actions</th></tr>
+      </thead>
+      <tbody id="series-table-body"></tbody>
+    </table>
+    <button id="add-series-btn">Ajouter Série</button>
+  </div>
+
+  <!-- Onglets séries -->
+  <div class="tabs" id="series-tabs"></div>
+
+  <!-- Gongs -->
+  <div class="gongs-container" id="gong-container"></div>
+
+  <!-- Timer -->
+  <div class="timer-container">
+    <span class="tireur-selected" id="timer-tireur">Aucun tireur</span>
+    <div class="timer-wrapper">
+      <div class="timer-bar"></div>
+      <div class="timer-text" id="timer-display">0s</div>
+    </div>
+    <button class="start-btn" id="start-btn">Démarrer</button>
+    <button class="start-btn" id="export-pdf-btn">Exporter PDF</button>
+  </div>
+
+  <!-- Tableau des scores -->
+  <table id="score-table">
+    <thead><tr></tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
