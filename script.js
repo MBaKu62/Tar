@@ -71,11 +71,9 @@ function startTimer(){
     }
   },1000);
 }
-
-
 function updateTimerDisplay(){ 
   timerDisplay.textContent = `${timer}s`; 
-  timerTireur.textContent = tireurs[currentTireurIndex]?.name || "Aucun tireur"; 
+  // timerTireur.textContent = tireurs[currentTireurIndex]?.name || "Aucun tireur";  // Commenté
 }
 
 function updateTimerBar(){ 
@@ -219,13 +217,27 @@ function exportPDF(){
   const doc = new jsPDF();
   doc.setFontSize(18);
   doc.text("Résultats du tir", 105, 15, null, null, "center");
-  const headers = [["Tireur", ...SERIES.map(s=>s.name), "Total", "% Touché"]];
-  const data = tireurs.map(t=>{
+  
+  // Ajout colonne # + TRI identique à renderScoreTable
+  const headers = [["#", "Tireur", ...SERIES.map(s=>s.name), "Total", "% Touché"]];
+  const rows = tireurs.map(t => {
     const serieScores = t.scores.map(s=>s.reduce((a,b)=>a+b,0));
     const total = serieScores.reduce((a,b)=>a+b,0);
-    const perc = Math.round((total/(SERIES.length*100))*100);
-    return [t.name, ...serieScores, total, perc+"%"];
+    const maxTotal = SERIES.reduce((acc, s) => acc + (s.gongs * 10), 0);
+    const perc = maxTotal ? Math.round((total / maxTotal) * 100) : 0;
+    return { t, serieScores, total, perc };
+  }).sort((a,b) => {
+    if (b.total !== a.total) return b.total - a.total;
+    for (let i = SERIES.length - 1; i >= 0; i--) {
+      if (b.serieScores[i] !== a.serieScores[i]) return b.serieScores[i] - a.serieScores[i];
+    }
+    return a.t.name.localeCompare(b.t.name, "fr", { sensitivity: "base" });
   });
+  
+  const data = rows.map(({ t, serieScores, total, perc }, idx) => 
+    [(idx+1), t.name, ...serieScores, total, perc+"%"]
+  );
+  
   doc.autoTable({ head: headers, body: data, startY: 25, theme: 'grid' });
   doc.save("resultats_tir.pdf");
 }

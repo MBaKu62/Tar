@@ -103,4 +103,8 @@ h1,h2 { text-align:center; color: var(--accent); text-shadow:0 0 10px var(--acce
   #score-table th, #score-table td { font-size:12px; padding:4px 6px; }
   .tireurs-list li { flex-wrap: wrap; }
 }
+.tireur-selected {
+  display: none !important;
+}
+
 
