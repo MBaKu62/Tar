@@ -1,127 +1,105 @@
-console.log("JS chargé OK");
+console.log('JS chargé OK');
 
-// ==== CONFIG SÉRIES (pour les points / tableau) ====
+// CONFIG SÉRIES pour les points
 const SERIES = [
-  { name: "Série 1", gongs: 10 },
-  { name: "Série 2", gongs: 10 },
-  { name: "Série 3", gongs: 10 },
-  { name: "Série 4", gongs: 10 }
+  { name: 'Série 1', gongs: 10 },
+  { name: 'Série 2', gongs: 10 },
+  { name: 'Série 3', gongs: 10 },
+  { name: 'Série 4', gongs: 10 }
 ];
 
-// ==== CONFIG TIMER GLOBAL ====
-// Série 0 = entraînement (30s), puis 4 séries match : 30, 30, 20, 20
-const SERIES_TIMER_CONFIG = [
-  { label: "Série 0 (Entraînement)", shootTime: 30 },
-  { label: "Série 1", shootTime: 30 },
-  { label: "Série 2", shootTime: 30 },
-  { label: "Série 3", shootTime: 20 },
-  { label: "Série 4", shootTime: 20 }
+// CONFIG TIMER GLOBAL : Série 0 entraînement 30s, puis 4 séries match 30, 30, 20, 20
+const SERIESTIMERCONFIG = [
+  { label: 'Série 0 Entraînement', shootTime: 30 },
+  { label: 'Série 1', shootTime: 30 },
+  { label: 'Série 2', shootTime: 30 },
+  { label: 'Série 3', shootTime: 20 },
+  { label: 'Série 4', shootTime: 20 }
 ];
 
-// Génération des phases : pour chaque série -> prep 60s, ready 7s, fire shootTime
+// Génération des phases pour chaque série - prep 60s, ready 7s, fire shootTime
 const PHASES = [];
-SERIES_TIMER_CONFIG.forEach((serie, index) => {
-  PHASES.push({
-    type: "prep",
-    duration: 60,
-    text: `Préparation ${serie.label}`,
-    sound: "prep",
-    serieIndexForScores: index
-  });
-  PHASES.push({
-    type: "ready",
-    duration: 7,
-    text: `Mise en place ${serie.label}`,
-    sound: "ready",
-    serieIndexForScores: index
-  });
-  PHASES.push({
-    type: "fire",
-    duration: serie.shootTime,
-    text: `Tir ${serie.label}`,
-    sound: "fire",
-    endSound: "stop",
-    serieIndexForScores: index   // 0 = entraînement, 1..4 = séries de match
-  });
+SERIESTIMERCONFIG.forEach((serie, index) => {
+  PHASES.push({ type: 'prep', duration: 60, text: `Préparation ${serie.label}`, sound: 'prep', serieIndexForScores: index });
+  PHASES.push({ type: 'ready', duration: 7, text: `Mise en place ${serie.label}`, sound: 'ready', serieIndexForScores: index });
+  PHASES.push({ type: 'fire', duration: serie.shootTime, text: `Tir ${serie.label}`, sound: 'fire', endSound: 'stop', serieIndexForScores: index });
+  // 0 entraînement, 1..4 séries de match
 });
 
-// ==== VARIABLES ====
+// VARIABLES
 let tireurs = [];
 let currentTireurIndex = null;
-let currentSeries = 0;          // 0..3 pour les scores uniquement
+let currentSeries = 0; // 0..3 pour les scores uniquement
 let timer = 0;
 let timerInterval = null;
-let currentPhaseIndex = -1;     // index dans PHASES
+let currentPhaseIndex = -1; // index dans PHASES
 
-// ==== ELEMENTS DOM ====
-const tireurNameInput = document.getElementById("tireur-name"),
-      addTireurBtn = document.getElementById("add-tireur-btn"),
-      tireursUl = document.getElementById("tireurs-ul"),
-      seriesTabs = document.getElementById("series-tabs"),
-      startBtn = document.getElementById("start-btn"),
-      resetBtn = document.getElementById("reset-btn"),
-      timerDisplay = document.getElementById("timer-display"),
-      timerBar = document.querySelector(".timer-bar"),
-      timerTireur = document.getElementById("timer-tireur"),
-      exportPdfBtn = document.getElementById("export-pdf-btn"),
-      messageDiv = document.getElementById("message"),
-      historyContainer = document.getElementById("history-container"),
-      scoreTable = document.getElementById("score-table"),
-      currentSeriesLabel = document.getElementById("current-series-label");
+// ELEMENTS DOM
+const tireurNameInput = document.getElementById('tireur-name');
+const addTireurBtn = document.getElementById('add-tireur-btn');
+const tireursUl = document.getElementById('tireurs-ul');
+const seriesTabs = document.getElementById('series-tabs');
+const startBtn = document.getElementById('start-btn');
+const resetBtn = document.getElementById('reset-btn');
+const timerDisplay = document.getElementById('timer-display');
+const timerBar = document.querySelector('.timer-bar');
+const timerTireur = document.getElementById('timer-tireur');
+const exportPdfBtn = document.getElementById('export-pdf-btn');
+const messageDiv = document.getElementById('message');
+const historyContainer = document.getElementById('history-container');
+const scoreTable = document.getElementById('score-table');
+const currentSeriesLabel = document.getElementById('current-series-label');
+const modeSelector = document.getElementById('mode-selector');
 
-// ==== AUDIO ====
-const soundPrep  = new Audio("./prep.mp3");
-const soundReady = new Audio("./ready.mp3");
-const soundFire  = new Audio("./fire.mp3");
-const soundStop  = new Audio("./stop.mp3");
+let currentMode = 'training'; // Par défaut
 
-// ==== INIT ====
-document.addEventListener("DOMContentLoaded", () => {
-  renderTabs();
-  renderTireurs();
-  renderScoreTable();
-  resetTimerGlobal();
-  updateCurrentSeriesLabel();
-});
-
-// ==== TIMER GLOBAL PAR PHASES ====
+// AUDIO
+const soundPrep = new Audio('prep.mp3');
+const soundReady = new Audio('ready.mp3');
+const soundFire = new Audio('fire.mp3');
+const soundStop = new Audio('stop.mp3');
 
 function playSound(name) {
   const map = {
-    prep: soundPrep,
-    ready: soundReady,
-    fire: soundFire,
-    stop: soundStop
+    'prep': soundPrep,
+    'ready': soundReady,
+    'fire': soundFire,
+    'stop': soundStop
   };
   const s = map[name];
   if (!s) return;
   try {
     s.currentTime = 0;
     s.play();
-  } catch (_) {}
+  } catch {}
 }
 
+// GET MODE
+function getMode() {
+  currentMode = modeSelector ? modeSelector.value : 'training';
+  return currentMode;
+}
+
+// TIMER GLOBAL PAR PHASES
 function startTimer() {
   if (currentTireurIndex === null) {
-    showMessage("Sélectionnez un tireur !");
+    showMessage('Sélectionnez un tireur !');
     return;
   }
-
   if (currentPhaseIndex !== -1 && currentPhaseIndex < PHASES.length) {
-    showMessage("Timer déjà en cours");
+    showMessage('Timer déjà en cours');
     return;
   }
-
   currentPhaseIndex = 0;
   launchCurrentPhase();
 }
 
 function launchCurrentPhase() {
-  if (currentPhaseIndex < 0 || currentPhaseIndex >= PHASES.length) {
-    showMessage("Séquence terminée pour ce tireur");
+  if (currentPhaseIndex >= PHASES.length) {
+    showMessage('Séquance terminée pour ce tireur');
     clearInterval(timerInterval);
     currentPhaseIndex = -1;
-    updateCurrentSeriesLabel(); // remet le texte "prête"
+    updateCurrentSeriesLabel(); // remet le texte prête
     return;
   }
 
@@ -138,26 +116,21 @@ function launchCurrentPhase() {
     timer--;
     updateTimerDisplay();
     updateTimerBar();
-
     if (timer <= 0) {
       clearInterval(timerInterval);
-
-      // son de fin (ex: STOP)
+      // son de fin ex STOP
       if (phase.endSound) playSound(phase.endSound);
 
-      // Si c'est la DERNIÈRE phase de tir de match (Série 4 = index 4)
-      if (phase.type === "fire" && phase.serieIndexForScores === 4) {
+      // Si c'est la DERNIERE phase de tir de match (Série 4 index 4)
+      if (phase.type === 'fire' && phase.serieIndexForScores === 4) {
         saveHistory(); // historique global une seule fois
       }
 
-      // Si c'est une phase de tir : délai de 2 s après STOP
-      if (phase.type === "fire") {
-        setTimeout(() => {
-          currentPhaseIndex++;
-          launchCurrentPhase();
-        }, 2000);
+      // Si c'est une phase de tir, délai de 2s après STOP
+      if (phase.type === 'fire') {
+        setTimeout(() => { currentPhaseIndex++; launchCurrentPhase(); }, 2000);
       } else {
-        // Autres phases : enchaînement immédiat
+        // Autres phases enchaînement immédiat
         currentPhaseIndex++;
         launchCurrentPhase();
       }
@@ -165,25 +138,20 @@ function launchCurrentPhase() {
   }, 1000);
 }
 
-// Affichage clair : Entraînement / Série X + phase + temps
+// Affichage clair "Entraînement/Série X + phase + temps"
 function updatePhaseLabel(phase) {
   if (!currentSeriesLabel) return;
-
   const idx = phase.serieIndexForScores;
-  let serieText = "";
-  if (idx === 0) {
-    serieText = "Entraînement";
-  } else if (idx >= 1 && idx <= 4) {
-    serieText = `Série ${idx}`;
-  }
-
-  let phaseName = "";
-  if (phase.type === "prep") phaseName = "Préparation";
-  else if (phase.type === "ready") phaseName = "Mise en place";
-  else if (phase.type === "fire") phaseName = "Tir";
-
-  currentSeriesLabel.textContent =
-    `${serieText ? serieText + " – " : ""}${phaseName} (${timer}s)`;
+  let serieText;
+  if (idx === 0) serieText = 'Entraînement';
+  else if (idx >= 1 && idx <= 4) serieText = `Série ${idx}`;
+  
+  let phaseName;
+  if (phase.type === 'prep') phaseName = 'Préparation';
+  else if (phase.type === 'ready') phaseName = 'Mise en place';
+  else if (phase.type === 'fire') phaseName = 'Tir';
+  
+  currentSeriesLabel.textContent = serieText ? `${serieText} - ${phaseName}` : `${phaseName} timers`;
 }
 
 function updateTimerDisplay() {
@@ -193,11 +161,11 @@ function updateTimerDisplay() {
 function updateTimerBar() {
   const phase = PHASES[currentPhaseIndex];
   if (!phase) {
-    timerBar.style.width = "0%";
+    timerBar.style.width = '0%';
     return;
   }
   const percent = Math.max(0, (timer / phase.duration) * 100);
-  timerBar.style.width = percent + "%";
+  timerBar.style.width = `${percent}%`;
 }
 
 // Reset complet du timer global
@@ -205,277 +173,285 @@ function resetTimerGlobal() {
   clearInterval(timerInterval);
   currentPhaseIndex = -1;
   timer = 0;
-  timerDisplay.textContent = "0s";
-  timerBar.style.width = "0%";
-  if (currentSeriesLabel) currentSeriesLabel.textContent = "";
-  updateCurrentSeriesLabel();
+  timerDisplay.textContent = '0s';
+  timerBar.style.width = '0%';
+  if (currentSeriesLabel) currentSeriesLabel.textContent = updateCurrentSeriesLabel();
 }
 
-// Info générale (uniquement quand aucune phase n'est en cours)
+// Info générale uniquement quand aucune phase n'est en cours
 function updateCurrentSeriesLabel() {
   if (!currentSeriesLabel) return;
   if (currentTireurIndex === null) {
-    currentSeriesLabel.textContent = "";
+    currentSeriesLabel.textContent = '';
     return;
   }
   if (currentPhaseIndex === -1) {
-    currentSeriesLabel.textContent =
-      "Séquence 821 prête pour le tireur sélectionné";
+    currentSeriesLabel.textContent = `Séquance prête pour le tireur sélectionné`;
   }
 }
 
-// ==== MESSAGE TEMPORAIRE ====
+// MESSAGE TEMPORAIRE
 function showMessage(text) {
   messageDiv.textContent = text;
-  setTimeout(() => {
-    messageDiv.textContent = "";
-  }, 2000);
+  setTimeout(() => { messageDiv.textContent = ''; }, 2000);
 }
 
-// ==== AJOUT TIREURS ====
+// AJOUT TIREURS
 function addTireur() {
   const name = tireurNameInput.value.trim();
   if (!name) {
-    showMessage("Entrez un nom valide");
+    showMessage('Entrez un nom valide');
     return;
   }
-  if (tireurs.some((t) => t.name === name)) {
-    showMessage("Tireur déjà existant !");
+  if (tireurs.some(t => t.name === name)) {
+    showMessage('Tireur déjà existant !');
     return;
   }
-
   tireurs.push({
     name,
-    scores: SERIES.map(() => ({
-      dist50: 0,
-      dist25: 0
-    }))
+    scores: SERIES.map(() => ({ dist50: 0, dist25: 0, total: 0 }))
   });
-
   currentTireurIndex = tireurs.length - 1;
   renderTireurs();
   renderScoreTable();
   resetTimerGlobal();
-  tireurNameInput.value = "";
+  tireurNameInput.value = '';
 }
 
 function renderTireurs() {
-  tireursUl.innerHTML = "";
+  tireursUl.innerHTML = '';
   tireurs.forEach((t, idx) => {
-    const li = document.createElement("li");
+    const li = document.createElement('li');
     li.innerHTML = `<span>${t.name}</span> <button>Supprimer</button>`;
-    li.addEventListener("click", (e) => {
-      if (e.target.tagName === "BUTTON") return;
+    li.addEventListener('click', (e) => {
+      if (e.target.tagName === 'BUTTON') return;
       currentTireurIndex = idx;
       renderTireurs();
       resetTimerGlobal();
     });
-    li.querySelector("button").addEventListener("click", (e) => {
+    li.querySelector('button').addEventListener('click', (e) => {
       e.stopPropagation();
       tireurs.splice(idx, 1);
-      if (currentTireurIndex >= tireurs.length)
+      if (currentTireurIndex >= tireurs.length) {
         currentTireurIndex = tireurs.length - 1;
+      }
       renderTireurs();
       renderScoreTable();
       resetTimerGlobal();
     });
-    li.classList.toggle("active", idx === currentTireurIndex);
+    if (idx === currentTireurIndex) li.classList.add('active');
     tireursUl.appendChild(li);
   });
 }
 
-// ==== SERIES ====
-// On ne montre plus les onglets de séries
+// SERIES : On ne montre plus les onglets de séries
 function renderTabs() {
   if (seriesTabs) {
-    seriesTabs.innerHTML = "";
+    seriesTabs.innerHTML = '';
   }
 }
 
-// ==== TABLEAU SCORES ====
+// TABLEAU SCORES - ADAPTATIF AU MODE
 function renderScoreTable() {
-  const thead = scoreTable.querySelector("thead tr");
-  thead.innerHTML =
-    "<th>#</th><th>Tireur</th>" +
-    SERIES.map((s) =>
-      `<th colspan="3">
-         ${s.name}<br>
-         <span style="font-size:11px;">50 m | 25 m | Total</span>
-       </th>`
-    ).join("") +
-    "<th>Total</th><th>Touch</th>";
+  const mode = getMode();
+  const thead = scoreTable.querySelector('thead tr');
 
-  const tbody = scoreTable.querySelector("tbody");
-  tbody.innerHTML = "";
+  if (mode === 'competition') {
+    // COMPÉTITION : 1 colonne par série, max 10 cibles (100 pts)
+    thead.innerHTML = `<th>#</th><th>Tireur</th>` +
+      SERIES.map(s => `<th>${s.name}<br><span style="font-size:11px"></span></th>`).join('') +
+      `<th>Total</th><th>%</th>`;
 
-  const rows = tireurs.map((t) => {
-    const serieScores = t.scores.map(
-      (s) => (s.dist50 + s.dist25) * 10
-    );
-    const total = serieScores.reduce((a, b) => a + b, 0);
-    const maxTotal = SERIES.length * (5 + 5) * 10;
-    const perc = maxTotal ? Math.round((total / maxTotal) * 100) : 0;
-    return { t, serieScores, total, perc };
-  });
+    const tbody = scoreTable.querySelector('tbody');
+    tbody.innerHTML = '';
 
-  rows.sort((a, b) => {
-    if (b.total !== a.total) return b.total - a.total;
-    for (let i = SERIES.length - 1; i >= 0; i--) {
-      if (b.serieScores[i] !== a.serieScores[i])
-        return b.serieScores[i] - a.serieScores[i];
-    }
-    return a.t.name.localeCompare(b.t.name, "fr", { sensitivity: "base" });
-  });
-
-  rows.forEach(({ t, serieScores, total, perc }, idx) => {
-    const tr = document.createElement("tr");
-    const rank = idx + 1;
-
-    let html = "";
-    html += `<td>${rank}</td>`;
-    html += `<td>${t.name}</td>`;
-
-    t.scores.forEach((s, serieIndex) => {
-      const serieTotal = serieScores[serieIndex];
-      html += `
-        <td>
-          <input type="number" min="0" max="5"
-            value="${s.dist50}"
-            data-name="${t.name}"
-            data-serie="${serieIndex}"
-            data-field="dist50"
-            style="width:3em;text-align:center;">
-        </td>
-        <td>
-          <input type="number" min="0" max="5"
-            value="${s.dist25}"
-            data-name="${t.name}"
-            data-serie="${serieIndex}"
-            data-field="dist25"
-            style="width:3em;text-align:center;">
-        </td>
-        <td>${serieTotal}</td>
-      `;
+    const rows = tireurs.map(t => {
+      const serieScores = t.scores.map(s => s.total || 0);
+      const total = serieScores.reduce((a, b) => a + b, 0);
+      const maxTotal = SERIES.length * 100;
+      const perc = maxTotal ? Math.round(total / maxTotal * 100) : 0;
+      return { t, serieScores, total, perc };
     });
 
-    html += `<td>${total}</td>`;
-    html += `<td>${perc}%</td>`;
+    rows.sort((a, b) => b.total - a.total);
 
-    tr.innerHTML = html;
-    tbody.appendChild(tr);
-  });
+    rows.forEach(({ t, serieScores, total, perc }, idx) => {
+      const tr = document.createElement('tr');
+      let html = `<td>${idx + 1}</td><td>${t.name}</td>`;
+      t.scores.forEach((s, serieIndex) => {
+        html += `<td><input type="number" min="0" max="10" value="${s.total || 0}"
+          data-name="${t.name}" data-serie="${serieIndex}" data-field="total"
+          style="width:3em;text-align:center"></td>`;
+      });
+      html += `<td>${total}</td><td>${perc}%</td>`;
+      tr.innerHTML = html;
+      tbody.appendChild(tr);
+    });
 
-  tbody.querySelectorAll("input[type='number']").forEach((input) => {
-    input.addEventListener("change", (e) => {
+  } else {
+    // TRAINING : 50m + 25m + Total par série
+    thead.innerHTML = `<th>#</th><th>Tireur</th>` +
+      SERIES.map(s => `<th colspan="3">${s.name}<br><span style="font-size:11px">50m | 25m | Total</span></th>`).join('') +
+      `<th>Total</th><th>%</th>`;
+
+    const tbody = scoreTable.querySelector('tbody');
+    tbody.innerHTML = '';
+
+    const rows = tireurs.map(t => {
+      const serieScores = t.scores.map(s => (s.dist50 + s.dist25) * 10);
+      const total = serieScores.reduce((a, b) => a + b, 0);
+      const maxTotal = SERIES.length * 50 * 10; // 5+5 cibles x 10 pts
+      const perc = maxTotal ? Math.round(total / maxTotal * 100) : 0;
+      return { t, serieScores, total, perc };
+    });
+
+    rows.sort((a, b) => b.total - a.total);
+
+    rows.forEach(({ t, serieScores, total, perc }, idx) => {
+      const tr = document.createElement('tr');
+      let html = `<td>${idx + 1}</td><td>${t.name}</td>`;
+      t.scores.forEach((s, serieIndex) => {
+        const serieTotal = serieScores[serieIndex];
+        html += `
+          <td><input type="number" min="0" max="5" value="${s.dist50}"
+            data-name="${t.name}" data-serie="${serieIndex}" data-field="dist50"
+            style="width:3em;text-align:center"></td>
+          <td><input type="number" min="0" max="5" value="${s.dist25}"
+            data-name="${t.name}" data-serie="${serieIndex}" data-field="dist25"
+            style="width:3em;text-align:center"></td>
+          <td>${serieTotal}</td>`;
+      });
+      html += `<td>${total}</td><td>${perc}%</td>`;
+      tr.innerHTML = html;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // INPUTS change handler UNIFIÉ
+  scoreTable.querySelectorAll('input[type=number]').forEach(input => {
+    input.addEventListener('change', e => {
       let val = parseInt(e.target.value, 10);
-      if (isNaN(val) || val < 0) val = 0;
-      if (val > 5) val = 5;
+      if (isNaN(val)) val = 0;
+      const max = parseInt(e.target.max);
+      if (val < 0) val = 0;
+      if (val > max) val = max;
       e.target.value = val;
 
-      const name = e.target.getAttribute("data-name");
-      const serieIndex = parseInt(
-        e.target.getAttribute("data-serie"),
-        10
-      );
-      const field = e.target.getAttribute("data-field");
-
-      const tireur = tireurs.find((tt) => tt.name === name);
+      const name = e.target.getAttribute('data-name');
+      const serieIndex = parseInt(e.target.getAttribute('data-serie'), 10);
+      const field = e.target.getAttribute('data-field');
+      const tireur = tireurs.find(tt => tt.name === name);
       if (!tireur) return;
 
-      tireur.scores[serieIndex][field] = val;
-
+      const mode = getMode();
+      if (mode === 'competition' && field === 'total') {
+        tireur.scores[serieIndex].total = val * 10; // 10 cibles = 100 pts
+      } else {
+        tireur.scores[serieIndex][field] = val;
+      }
       renderScoreTable();
     });
   });
 }
 
-// ==== HISTORIQUE ====
-// Une seule entrée à la fin des 4 séries de match
+// HISTORIQUE : Une seule entrée à la fin des 4 séries de match
 function saveHistory() {
   const t = tireurs[currentTireurIndex];
   if (!t) return;
 
-  const serieText = t.scores.map((s, idx) => {
-    const pts50 = s.dist50 * 10;
-    const pts25 = s.dist25 * 10;
-    const total = pts50 + pts25;
-    return `S${idx+1} : ${pts50}/${pts25} (${total})`;
-  }).join(" | ");
+  const mode = getMode();
+  let serieText;
+  if (mode === 'competition') {
+    serieText = t.scores.map((s, idx) => `S${idx+1}: ${s.total || 0} pts`).join(' | ');
+  } else {
+    serieText = t.scores.map((s, idx) => {
+      const pts50 = s.dist50 * 10;
+      const pts25 = s.dist25 * 10;
+      const total = pts50 + pts25;
+      return `S${idx+1}: ${pts50}+${pts25}=${total}`;
+    }).join(' | ');
+  }
 
-  const totalGlobal = t.scores
-    .map(s => (s.dist50 + s.dist25) * 10)
-    .reduce((a,b)=>a+b,0);
+  const totalGlobal = t.scores.reduce((acc, s) => {
+    return acc + (s.total || (s.dist50 + s.dist25) * 10);
+  }, 0);
 
-  const div = document.createElement("div");
-  div.innerHTML =
-    `${t.name} → ${serieText} | Tot=${totalGlobal} pts ` +
-    `<button>Supprimer</button>`;
-
-  div.querySelector("button").addEventListener("click", () => {
-    div.remove();
-  });
+  const div = document.createElement('div');
+  div.innerHTML = `${t.name}: ${serieText} | Tot: ${totalGlobal} pts <button>Supprimer</button>`;
+  div.querySelector('button').addEventListener('click', () => div.remove());
   historyContainer.appendChild(div);
 }
 
-// ==== EXPORT PDF ====
-// Affiche uniquement S1/S2/S3/S4 avec 50m et 25m
+// EXPORT PDF : Adapté au mode
 function exportPDF() {
   if (tireurs.length === 0) {
-    showMessage("Aucun tireur à exporter !");
+    showMessage('Aucun tireur à exporter !');
     return;
   }
+
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
   doc.setFontSize(18);
-  doc.text("Résultats du tir", 105, 15, null, null, "center");
+  doc.text('Résultats du tir', 105, 15, null, null, 'center');
 
-  const headers = [[
-    "#",
-    "Tireur",
-    ...SERIES.flatMap((s, i) => [
-      `S${i+1} 50m`,
-      `S${i+1} 25m`
-    ])
-  ]];
+  const mode = getMode();
+  let headers, data;
 
-  const rows = tireurs.map((t) => {
-    const serieDetails = t.scores.map(s => ({
-      pts50: s.dist50 * 10,
-      pts25: s.dist25 * 10
-    }));
-    return { t, serieDetails };
+  if (mode === 'competition') {
+    headers = ['', 'Tireur', ...SERIES.map((_, i) => `S${i+1}`)];
+    data = tireurs.map((t, idx) => {
+      const flatSeries = t.scores.map(s => s.total || 0);
+      return [idx + 1, t.name, ...flatSeries];
+    });
+  } else {
+    headers = ['', 'Tireur', ...SERIES.flatMap((_, i) => [`S${i+1} 50m`, `S${i+1} 25m`])];
+    data = tireurs.map((t, idx) => {
+      const flatSeries = t.scores.flatMap(s => [s.dist50 * 10, s.dist25 * 10]);
+      return [idx + 1, t.name, ...flatSeries];
+    });
+  }
+
+  doc.autoTable({
+    head: [headers],
+    body: data,
+    startY: 25,
+    theme: 'grid'
   });
-
-  const data = rows.map(({ t, serieDetails }, idx) => {
-    const flatSeries = serieDetails.flatMap(sd => [
-      sd.pts50,
-      sd.pts25
-    ]);
-    return [
-      idx + 1,
-      t.name,
-      ...flatSeries
-    ];
-  });
-
-  doc.autoTable({ head: headers, body: data, startY: 25, theme: "grid" });
-  doc.save("resultats_tir.pdf");
+  doc.save('resultats-tir.pdf');
 }
 
-// ==== EVENTS ====
-addTireurBtn.addEventListener("click", addTireur);
-tireurNameInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") addTireur();
-});
-startBtn.addEventListener("click", startTimer);
-resetBtn.addEventListener("click", resetTimerGlobal);
-exportPdfBtn.addEventListener("click", exportPDF);
+// INIT
+document.addEventListener('DOMContentLoaded', () => {
+  renderTabs();
+  renderTireurs();
+  renderScoreTable();
+  resetTimerGlobal();
+  updateCurrentSeriesLabel();
 
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker
-      .register("sw.js")
-      .then((reg) => console.log("Service Worker enregistré:", reg))
-      .catch((err) => console.log("Erreur Service Worker:", err));
+  // MODE CHANGE
+  if (modeSelector) {
+    modeSelector.addEventListener('change', () => {
+      tireurs.forEach(t => {
+        t.scores = SERIES.map(() => ({ dist50: 0, dist25: 0, total: 0 }));
+      });
+      renderScoreTable();
+    });
+  }
+});
+
+// EVENTS
+addTireurBtn.addEventListener('click', addTireur);
+tireurNameInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') addTireur();
+});
+startBtn.addEventListener('click', startTimer);
+resetBtn.addEventListener('click', resetTimerGlobal);
+exportPdfBtn.addEventListener('click', exportPDF);
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(reg => console.log('Service Worker enregistré', reg))
+      .catch(err => console.log('Erreur Service Worker', err));
   });
 }
