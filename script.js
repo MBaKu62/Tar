@@ -255,103 +255,107 @@ function renderTabs() {
 function renderScoreTable() {
   const mode = getMode();
   const thead = scoreTable.querySelector('thead tr');
-
+  const tbody = scoreTable.querySelector('tbody');
+  
   if (mode === 'competition') {
-    // COMPÉTITION : 1 colonne par série, max 10 cibles (100 pts)
+    // COMPÉTITION : 1 input (0-10 cibles total) × 10 pts
     thead.innerHTML = `<th>#</th><th>Tireur</th>` +
       SERIES.map(s => `<th>${s.name}<br><span style="font-size:11px"></span></th>`).join('') +
-      `<th>Total</th><th>%</th>`;
-
-    const tbody = scoreTable.querySelector('tbody');
-    tbody.innerHTML = '';
-
-    const rows = tireurs.map(t => {
-      const serieScores = t.scores.map(s => s.total || 0);
-      const total = serieScores.reduce((a, b) => a + b, 0);
-      const maxTotal = SERIES.length * 100;
-      const perc = maxTotal ? Math.round(total / maxTotal * 100) : 0;
-      return { t, serieScores, total, perc };
-    });
-
-    rows.sort((a, b) => b.total - a.total);
-
-    rows.forEach(({ t, serieScores, total, perc }, idx) => {
-      const tr = document.createElement('tr');
-      let html = `<td>${idx + 1}</td><td>${t.name}</td>`;
-      t.scores.forEach((s, serieIndex) => {
-        html += `<td><input type="number" min="0" max="10" value="${s.total || 0}"
-          data-name="${t.name}" data-serie="${serieIndex}" data-field="total"
-          style="width:3em;text-align:center"></td>`;
-      });
-      html += `<td>${total}</td><td>${perc}%</td>`;
-      tr.innerHTML = html;
-      tbody.appendChild(tr);
-    });
-
+      `<th>Total pts</th><th>%</th>`;
+    
+    tbody.className = 'competition';
+    
   } else {
-    // TRAINING : 50m + 25m + Total par série
+    // TRAINING : 2 inputs séparés (0-5 cibles 50m + 0-5 cibles 25m)
     thead.innerHTML = `<th>#</th><th>Tireur</th>` +
-      SERIES.map(s => `<th colspan="3">${s.name}<br><span style="font-size:11px">50m | 25m | Total</span></th>`).join('') +
-      `<th>Total</th><th>%</th>`;
+      SERIES.map(s => `<th colspan="3">${s.name}<br><span style="font-size:11px">50m | 25m</span></th>`).join('') +
+      `<th>Total pts</th><th>%</th>`;
+    
+    tbody.className = 'training';
+  }
+  
+  tbody.innerHTML = '';
 
-    const tbody = scoreTable.querySelector('tbody');
-    tbody.innerHTML = '';
+  const rows = tireurs.map(t => {
+    let seriePts, maxTotal;
+    
+    if (mode === 'competition') {
+      seriePts = t.scores.map(s => (s.cibles || 0) * 10);
+      maxTotal = SERIES.length * 100; // 10 cibles × 10 pts × 4 séries
+    } else {
+      seriePts = t.scores.map(s => (s.dist50 + s.dist25) * 10);
+      maxTotal = SERIES.length * 100; // (5+5) cibles × 10 pts × 4 séries
+    }
+    
+    const total = seriePts.reduce((a, b) => a + b, 0);
+    const perc = maxTotal ? Math.round(total / maxTotal * 100) : 0;
+    return { t, seriePts, total, perc };
+  });
 
-    const rows = tireurs.map(t => {
-      const serieScores = t.scores.map(s => (s.dist50 + s.dist25) * 10);
-      const total = serieScores.reduce((a, b) => a + b, 0);
-      const maxTotal = SERIES.length * 50 * 10; // 5+5 cibles x 10 pts
-      const perc = maxTotal ? Math.round(total / maxTotal * 100) : 0;
-      return { t, serieScores, total, perc };
-    });
+  rows.sort((a, b) => b.total - a.total);
 
-    rows.sort((a, b) => b.total - a.total);
-
-    rows.forEach(({ t, serieScores, total, perc }, idx) => {
-      const tr = document.createElement('tr');
-      let html = `<td>${idx + 1}</td><td>${t.name}</td>`;
-      t.scores.forEach((s, serieIndex) => {
-        const serieTotal = serieScores[serieIndex];
+  rows.forEach(({ t, seriePts, total, perc }, idx) => {
+    const tr = document.createElement('tr');
+    let html = `<td style="font-weight:bold">${idx + 1}</td><td>${t.name}</td>`;
+    
+    t.scores.forEach((s, serieIndex) => {
+      if (mode === 'competition') {
+        const cibles = s.cibles || 0;
+        const pts = seriePts[serieIndex];
+        html += `
+          <td>
+            <input type="number" min="0" max="10" value="${cibles}"
+              data-name="${t.name}" data-serie="${serieIndex}" data-field="cibles"
+              style="width:4em">
+            <br><small>${pts} pts</small>
+          </td>`;
+      } else {
+        const pts50 = s.dist50 * 10;
+        const pts25 = s.dist25 * 10;
+        const serieTotal = seriePts[serieIndex];
         html += `
           <td><input type="number" min="0" max="5" value="${s.dist50}"
             data-name="${t.name}" data-serie="${serieIndex}" data-field="dist50"
-            style="width:3em;text-align:center"></td>
+            style="width:3em"> <small>${pts50}</small></td>
           <td><input type="number" min="0" max="5" value="${s.dist25}"
             data-name="${t.name}" data-serie="${serieIndex}" data-field="dist25"
-            style="width:3em;text-align:center"></td>
-          <td>${serieTotal}</td>`;
-      });
-      html += `<td>${total}</td><td>${perc}%</td>`;
-      tr.innerHTML = html;
-      tbody.appendChild(tr);
-    });
-  }
-
-  // INPUTS change handler UNIFIÉ
-  scoreTable.querySelectorAll('input[type=number]').forEach(input => {
-    input.addEventListener('change', e => {
-      let val = parseInt(e.target.value, 10);
-      if (isNaN(val)) val = 0;
-      const max = parseInt(e.target.max);
-      if (val < 0) val = 0;
-      if (val > max) val = max;
-      e.target.value = val;
-
-      const name = e.target.getAttribute('data-name');
-      const serieIndex = parseInt(e.target.getAttribute('data-serie'), 10);
-      const field = e.target.getAttribute('data-field');
-      const tireur = tireurs.find(tt => tt.name === name);
-      if (!tireur) return;
-
-      const mode = getMode();
-      if (mode === 'competition' && field === 'total') {
-        tireur.scores[serieIndex].total = val * 10; // 10 cibles = 100 pts
-      } else {
-        tireur.scores[serieIndex][field] = val;
+            style="width:3em"> <small>${pts25}</small></td>
+          <td><strong>${serieTotal}</strong></td>`;
       }
-      renderScoreTable();
     });
+    
+    html += `<td style="font-size:18px;font-weight:bold;color:var(--accent)">${total}</td><td style="color:var(--red);font-weight:bold">${perc}%</td>`;
+    tr.innerHTML = html;
+    tbody.appendChild(tr);
   });
+
+  // EVENT HANDLER INPUTS
+  scoreTable.querySelectorAll('input[type=number]').forEach(input => {
+    input.removeEventListener('change', handleInputChange); // Évite doublons
+    input.addEventListener('change', handleInputChange);
+  });
+}
+
+// FONCTION DÉDIÉE INPUTS
+function handleInputChange(e) {
+  let val = parseInt(e.target.value, 10) || 0;
+  const max = parseInt(e.target.max);
+  val = Math.max(0, Math.min(val, max));
+  e.target.value = val;
+
+  const name = e.target.getAttribute('data-name');
+  const serieIndex = parseInt(e.target.getAttribute('data-serie'), 10);
+  const field = e.target.getAttribute('data-field');
+  const tireur = tireurs.find(tt => tt.name === name);
+  if (!tireur) return;
+
+  const mode = getMode();
+  if (mode === 'competition' && field === 'cibles') {
+    tireur.scores[serieIndex].cibles = val;
+  } else {
+    tireur.scores[serieIndex][field] = val;
+  }
+  renderScoreTable();
 }
 
 // HISTORIQUE : Une seule entrée à la fin des 4 séries de match
