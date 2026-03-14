@@ -127,3 +127,102 @@ text-shadow: 1px 1px 2px #000;
 .tireur-selected {
 display: none !important;
 }
+/* CORRECTIONS SPÉCIFIQUES HTML - Nom tireur / Mode / Tri / PDF */
+#tireur-name {
+  flex: 1;
+  background: var(--bg);
+  color: var(--accent);
+  border: 1px solid var(--accent-dark);
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 16px;
+  min-width: 200px;
+}
+
+#tireur-name:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+
+/* SÉLECTEUR MODE */
+#mode-selector-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 15px 0;
+  padding: 10px;
+  background: var(--hover);
+  border: 1px solid var(--accent-dark);
+  border-radius: 6px;
+  justify-content: center;
+}
+
+#mode-selector-container label {
+  color: var(--accent);
+  font-weight: bold;
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+#mode-selector {
+  background: var(--bg);
+  color: var(--accent);
+  border: 2px solid var(--accent-dark);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+#mode-selector:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+
+/* Bouton "Trier par score" */
+#sort-btn.sort-btn {
+  display: block;
+  margin: 10px auto;
+  padding: 10px 20px;
+  background: var(--button);
+  color: var(--accent);
+  border: 1px solid var(--accent-dark);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: 0.2s;
+}
+
+#sort-btn.sort-btn:hover {
+  background: var(--button-hover);
+  box-shadow: 0 0 8px var(--accent);
+}
+
+/* Bouton PDF */
+#export-pdf-btn.export-btn {
+  padding: 10px 16px;
+  background: var(--button);
+  color: var(--accent);
+  border: 1px solid var(--accent-dark);
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+#export-pdf-btn.export-btn:hover {
+  background: var(--button-hover);
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  #mode-selector-container {
+    flex-direction: column;
+    text-align: center;
+  }
+  #sort-btn.sort-btn {
+    width: 100%;
+    max-width: 300px;
+  }
+}
