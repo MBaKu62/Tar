@@ -1,61 +1,125 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Compteur de Tir TAR</title>
-<link rel="stylesheet" href="style.css">
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#00ff99">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+  <meta charset="UTF-8">
+  <title>Gestion tir gong 821</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+
+  <!-- jsPDF + autotable pour l'export PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
-<div class="container">
-  <h1>Compteur de Tir TAR</h1>
-  
-  <!-- Message d'erreur -->
-  <div id="message"></div>
+  <div class="container">
 
-  <!-- Ajout Tireur -->
-  <div class="add-tireur-zone">
-    <input type="text" id="tireur-name" placeholder="Nom du tireur">
-    <button id="add-tireur-btn">Ajouter</button>
-  </div>
-
-  <!-- Liste Tireurs -->
-  <ul class="tireurs-list" id="tireurs-ul"></ul>
-
-  <!-- Onglets séries -->
-  <div class="tabs" id="series-tabs"></div>
-
-  <!-- Gongs -->
-  <div class="gongs-container" id="gong-container"></div>
-
-  <!-- Timer -->
-  <div id="timer-tireur" class="tireur-selected"></div>
-  <div class="timer-container">
-    <div class="timer-wrapper">
-      <div class="timer-bar"></div>
-      <div class="timer-text" id="timer-display">0s</div>
+    <!-- ONGLET PRINCIPAUX : ACCUEIL / 821 -->
+    <div class="tabs" id="main-tabs">
+      <div class="tab active" data-main-tab="accueil">Accueil</div>
+      <div class="tab" data-main-tab="821">821</div>
     </div>
-    <button class="start-btn" id="start-btn">Démarrer</button>
-    <button class="start-btn" id="export-pdf-btn">Exporter PDF</button>
+
+    <!-- PAGE ACCUEIL -->
+    <div id="onglet-accueil" class="main-tab-page active">
+      <h1>Gestion tir gong</h1>
+
+      <h2>Règles 821</h2>
+      <p style="margin-bottom:8px; text-align:center;">
+        Format 821 : chaque tireur réalise 4 séries de tir, avec des cibles à 50 m et 25 m.
+      </p>
+      <ul style="margin:0 0 10px 20px;">
+        <li>4 séries par tireur.</li>
+        <li>À chaque série : jusqu’à 5 cibles à 50 m et 5 cibles à 25 m.</li>
+        <li>1 cible touchée = 10 points.</li>
+        <li>Score d’une série = (touches 50 m + touches 25 m) × 10.</li>
+        <li>Score total = somme des 4 séries.</li>
+      </ul>
+
+      <p style="text-align:center; margin-top:10px;">
+        Utilisez l’onglet <strong>821</strong> pour gérer les tireurs, lancer les séries
+        et consulter le classement en direct.
+      </p>
+    </div>
+
+    <!-- PAGE 821 -->
+    <div id="onglet-821" class="main-tab-page">
+      <h1>Compétition 821</h1>
+
+      <!-- Message -->
+      <div id="message"></div>
+
+      <!-- Ajout tireur -->
+      <div class="add-tireur-zone">
+        <input type="text" id="tireur-name" placeholder="Nom du tireur">
+        <button id="add-tireur-btn">Ajouter</button>
+      </div>
+
+      <!-- Liste tireurs -->
+      <ul id="tireurs-ul" class="tireurs-list"></ul>
+
+      <!-- Ancienne barre séries (laissée vide) -->
+      <div id="series-tabs" class="tabs"></div>
+
+      <!-- Timer -->
+      <div class="timer-container">
+        <div class="timer-wrapper">
+          <div class="timer-bar"></div>
+          <div class="timer-text" id="timer-display">0s</div>
+        </div>
+
+        <!-- Phase / série en cours -->
+        <div id="current-series-label" class="tireur-selected"></div>
+
+        <!-- Tireur sélectionné (masqué par CSS) -->
+        <div id="timer-tireur" class="tireur-selected"></div>
+
+        <button id="start-btn" class="start-btn">Start</button>
+        <button id="reset-btn">Reset</button>
+        <button id="export-pdf-btn">Export PDF</button>
+      </div>
+
+      <!-- Historique -->
+      <h2>Historique</h2>
+      <div id="history-container"></div>
+
+      <!-- Tableau scores -->
+      <div class="table-wrapper">
+        <table id="score-table">
+          <thead>
+            <tr></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <!-- Légende tableau -->
+      <p style="text-align:center; margin-top:10px; font-size:12px;">
+        Entrer le nombre de cibles touchées (0 à 5) pour chaque distance :
+        50 m | 25 m. Le total de la série est calculé automatiquement.
+      </p>
+    </div>
+
   </div>
 
-  <!-- Tableau des scores -->
-  <div class="table-wrapper">
-    <table id="score-table">
-      <thead><tr></tr></thead>
-      <tbody></tbody>
-    </table>
-  </div>
+  <script src="script.js"></script>
 
-  <!-- Historique -->
-  <h2>Historique</h2>
-  <div id="history-container"></div>
-</div>
+  <!-- Script pour gérer les onglets Accueil / 821 -->
+  <script>
+    const mainTabs = document.querySelectorAll('#main-tabs .tab');
+    const mainPages = document.querySelectorAll('.main-tab-page');
 
-<script src="script.js"></script>
+    mainTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const target = tab.getAttribute('data-main-tab');
+
+        mainTabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+
+        mainPages.forEach(page => {
+          page.classList.toggle('active', page.id === 'onglet-' + target);
+        });
+      });
+    });
+  </script>
 </body>
 </html>
