@@ -9,7 +9,6 @@ const SERIES = [
 ];
 
 // ==== CONFIG TIMER GLOBAL ====
-// Série 0 = entraînement (30s), puis 4 séries match : 30, 30, 20, 20
 const SERIES_TIMER_CONFIG = [
   { label: "Série 0 (Entraînement)", shootTime: 30 },
   { label: "Série 1", shootTime: 30 },
@@ -313,20 +312,26 @@ function renderTabs() {
 
 // ==== HANDLER INPUTS TABLEAU ====
 function handleScoreInputChange(e) {
-  let val = parseInt(e.target.value, 10);
+  const raw = e.target.value.trim();
+  const name = e.target.getAttribute("data-name");
+  const serieIndex = parseInt(e.target.getAttribute("data-serie"), 10);
+  const field = e.target.getAttribute("data-field");
+  const tireur = tireurs.find(tt => tt.name === name);
+
+  if (!tireur) return;
+
+  if (raw === "") {
+    tireur.scores[serieIndex][field] = "";
+    renderScoreTable();
+    return;
+  }
+
+  let val = parseInt(raw, 10);
   if (isNaN(val)) val = 0;
 
   const max = parseInt(e.target.max, 10);
   if (val < 0) val = 0;
   if (val > max) val = max;
-  e.target.value = val;
-
-  const name = e.target.getAttribute("data-name");
-  const serieIndex = parseInt(e.target.getAttribute("data-serie"), 10);
-  const field = e.target.getAttribute("data-field");
-
-  const tireur = tireurs.find((tt) => tt.name === name);
-  if (!tireur) return;
 
   tireur.scores[serieIndex][field] = val;
   renderScoreTable();
@@ -342,14 +347,14 @@ function renderScoreTable() {
     thead.innerHTML =
       `<th>#</th><th>Tireur</th>` +
       SERIES.map(
-        (s) => `<th>${s.name}<br><span style="font-size:11px">Cibles (0-10)</span></th>`
+        (s) => `<th>${s.name}<br><span style="font-size:11px"></span></th>`
       ).join("") +
       `<th>Total pts</th><th>%</th>`;
   } else {
     thead.innerHTML =
       `<th>#</th><th>Tireur</th>` +
       SERIES.map(
-        (s) => `<th colspan="3">${s.name}<br><span style="font-size:11px">50m | 25m | Total</span></th>`
+        (s) => `<th colspan="3">${s.name}<br><span style="font-size:11px">50m | 25m </span></th>`
       ).join("") +
       `<th>Total pts</th><th>%</th>`;
   }
