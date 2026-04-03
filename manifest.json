@@ -1,7 +1,7 @@
 {
-  "name": "Tir Gong",
-  "short_name": "Tir Gong",
-  "description": "Gestion de tir au gong",
+  "name": "Tir",
+  "short_name": "Tir",
+  "description": "Gestion de tir",
   "start_url": "/Tar/",
   "scope": "/Tar/",
   "display": "standalone",
