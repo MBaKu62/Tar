@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Tir</title>
+  <title>Tir Gong</title>
   <!-- ═══ PWA iOS ICONS ═══ -->
   <link rel="apple-touch-icon" sizes="57x57"   href="/Tar/icons/apple-touch-icon-57x57.png">
   <link rel="apple-touch-icon" sizes="60x60"   href="/Tar/icons/apple-touch-icon-60x60.png">
@@ -487,7 +487,7 @@
 
 
 <div class="navbar">
-  <div class="navbar-title">Tir<span style="opacity:.45"></span></div>
+  <div class="navbar-title" style="font-size:1.55rem;font-weight:900;letter-spacing:-.01em">Tir</div>
   <div class="navbar-badge badge-train" id="navbar-badge">🏋️ Entraînement</div>
 </div>
 <select id="mode-selector"><option value="training">Entraînement</option><option value="competition">Compétition</option></select>
@@ -498,7 +498,7 @@
   <!-- ACCUEIL -->
   <div class="page active" id="page-home">
     <div class="hero train" id="hero-bg">
-      <h1>Gestion tar<br><span id="hero-label" style="color:var(--blue);transition:color .3s"></span></h1>
+      <h1 style="font-size:1.05rem;font-weight:600;color:rgba(200,210,230,.75);margin-bottom:0;letter-spacing:.01em">Gestion tir</h1>
       <p>Gérez vos tireurs, lancez les séries et consultez le classement en direct.</p>
     </div>
       <!-- DISCIPLINE TRIGGER -->
@@ -755,7 +755,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (modeSelector) {
     modeSelector.addEventListener("change", () => {
-   Saint-Brieuc   renderScoreTable();
+      renderScoreTable();
     });
   }
 });
@@ -1346,6 +1346,7 @@ function setMode(mode){
   var badge=document.getElementById("navbar-badge");
   badge.textContent=comp?"🏆 Compétition":"🏋️ Entraînement";
   badge.className="navbar-badge "+(comp?"badge-comp":"badge-train");
+  var hl=document.getElementById("hero-label");if(hl){hl.textContent=comp?"Compétition":"Entraînement";hl.style.color=comp?"var(--orange)":"var(--blue)";}
   document.getElementById("hero-label").style.color=d.color;
   document.getElementById("hero-bg").className="hero "+(comp?"comp":"train");
   document.getElementById("toggle-pill").classList.toggle("right",comp);
