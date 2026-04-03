@@ -498,7 +498,7 @@
   <!-- ACCUEIL -->
   <div class="page active" id="page-home">
     <div class="hero train" id="hero-bg">
-      <h1 style="font-size:1.05rem;font-weight:600;color:rgba(200,210,230,.75);margin-bottom:0;letter-spacing:.01em">Gestion tir</h1>
+      <h1 style="font-size:1.05rem;font-weight:600;color:rgba(200,210,230,.75);margin-bottom:0;letter-spacing:.01em">Gestion tir<span id="hero-label" style="display:none"></span></h1>
       <p>Gérez vos tireurs, lancez les séries et consultez le classement en direct.</p>
     </div>
       <!-- DISCIPLINE TRIGGER -->
@@ -1347,7 +1347,7 @@ function setMode(mode){
   badge.textContent=comp?"🏆 Compétition":"🏋️ Entraînement";
   badge.className="navbar-badge "+(comp?"badge-comp":"badge-train");
   var hl=document.getElementById("hero-label");if(hl){hl.textContent=comp?"Compétition":"Entraînement";hl.style.color=comp?"var(--orange)":"var(--blue)";}
-  document.getElementById("hero-label").style.color=d.color;
+  var _hl=document.getElementById("hero-label");if(_hl)_hl.style.color=d.color;
   document.getElementById("hero-bg").className="hero "+(comp?"comp":"train");
   document.getElementById("toggle-pill").classList.toggle("right",comp);
   document.getElementById("btn-training").classList.toggle("active",!comp);
