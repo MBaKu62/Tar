@@ -1,0 +1,1513 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Tir Gong 821</title>
+  <link rel="manifest" href="./manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#000000">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+    :root{
+      --bg:#000;--bg2:#1c1c1e;--bg3:#2c2c2e;--bg4:#3a3a3c;
+      --label:#fff;--label2:rgba(255,255,255,.55);--label3:rgba(255,255,255,.28);
+      --sep:rgba(255,255,255,.1);
+      --blue:#0a84ff;--green:#30d158;--orange:#ff9f0a;
+      --red:#ff453a;--teal:#5ac8fa;--purple:#bf5af2;
+      --tab-h:83px;--nav-h:54px;
+    }
+    html,body{height:100%;overflow:hidden}
+    body{background:var(--bg);color:var(--label);
+      font-family:-apple-system,'SF Pro Display','Helvetica Neue',Arial,sans-serif;
+      height:100%;display:flex;flex-direction:column;overflow:hidden}
+
+    /* SPLASH */
+    #splash{position:fixed;inset:0;z-index:9999;background:var(--bg);
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+      transition:opacity .5s ease,transform .5s ease}
+    #splash.hide{opacity:0;transform:scale(1.04);pointer-events:none}
+    .splash-icon{width:80px;height:80px;border-radius:22px;
+      background:linear-gradient(135deg,var(--blue),var(--purple));
+      display:flex;align-items:center;justify-content:center;font-size:2.2rem;
+      box-shadow:0 8px 32px rgba(10,132,255,.4);
+      animation:splashPop .6s cubic-bezier(.34,1.56,.64,1)}
+    @keyframes splashPop{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:scale(1)}}
+    .splash-title{font-size:1.6rem;font-weight:800;letter-spacing:-.02em;animation:fadeUp .5s .2s both}
+    .splash-sub{font-size:.85rem;color:var(--label2);animation:fadeUp .5s .35s both}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+    /* FLASH */
+    #flash{position:fixed;inset:0;z-index:8888;pointer-events:none;opacity:0;background:rgba(48,209,88,.2)}
+    #flash.go{animation:flashAnim .55s ease}
+    @keyframes flashAnim{0%{opacity:0}25%{opacity:1}100%{opacity:0}}
+
+    /* NAVBAR */
+    .navbar{height:var(--nav-h);padding:0 16px;display:flex;align-items:center;justify-content:center;
+      background:rgba(0,0,0,.88);backdrop-filter:blur(28px) saturate(2);
+      -webkit-backdrop-filter:blur(28px) saturate(2);
+      border-bottom:1px solid var(--sep);flex-shrink:0;position:relative;z-index:200}
+    .navbar-title{font-size:1rem;font-weight:700}
+    .navbar-badge{position:absolute;right:14px;font-size:.68rem;font-weight:700;
+      padding:4px 10px;border-radius:99px;transition:all .3s}
+    .badge-train{background:rgba(10,132,255,.2);color:var(--blue);border:1px solid rgba(10,132,255,.3)}
+    .badge-comp{background:rgba(255,159,10,.2);color:var(--orange);border:1px solid rgba(255,159,10,.3)}
+
+    /* PAGES */
+    .pages{flex:1;position:relative;overflow:hidden;touch-action:pan-y}
+    .page{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+      padding:0 0 calc(var(--tab-h) + 4px);
+      opacity:0;pointer-events:none;transform:translateX(20px);
+      transition:opacity .24s cubic-bezier(.4,0,.2,1),transform .24s cubic-bezier(.4,0,.2,1)}
+    .page.active{opacity:1;pointer-events:auto;transform:translateX(0)}
+
+    /* TABBAR */
+    .tabbar{height:var(--tab-h);padding-bottom:env(safe-area-inset-bottom,16px);padding-top:8px;
+      background:rgba(0,0,0,.88);backdrop-filter:blur(28px) saturate(2);
+      -webkit-backdrop-filter:blur(28px) saturate(2);
+      border-top:1px solid var(--sep);display:flex;flex-shrink:0;z-index:200}
+    .tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:3px;cursor:pointer;padding:0 2px;transition:opacity .15s}
+    .tab:active{opacity:.5}
+    .tab-icon{font-size:1.38rem;transition:transform .22s cubic-bezier(.34,1.56,.64,1)}
+    .tab-label{font-size:.59rem;font-weight:600;letter-spacing:.02em;color:var(--label3);transition:color .3s}
+    .tab.active .tab-icon{transform:scale(1.13)}
+    .tab.active.t-train .tab-label{color:var(--blue)}
+    .tab.active.t-comp  .tab-label{color:var(--orange)}
+
+    /* UTILS */
+    .wrap{padding:14px 16px 0}
+    .slabel{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.09em;
+      color:var(--label2);padding:14px 4px 7px}
+    .ios-group{background:var(--bg2);border-radius:14px;overflow:hidden}
+    .ios-row{display:flex;align-items:center;gap:13px;padding:13px 16px;
+      border-bottom:1px solid var(--sep);transition:background .15s}
+    .ios-row:last-child{border-bottom:none}
+    .ios-row:active{background:var(--bg3)}
+    .row-icon{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;
+      justify-content:center;font-size:.88rem;flex-shrink:0}
+    .ri-blue{background:var(--blue)}.ri-green{background:var(--green)}
+    .ri-orange{background:var(--orange)}.ri-red{background:var(--red)}
+    .ri-purple{background:var(--purple)}.ri-teal{background:var(--teal)}
+    .row-body{flex:1}.row-title{font-size:.9rem;font-weight:600}
+    .row-sub{font-size:.74rem;color:var(--label2);margin-top:2px}
+
+    /* ACCUEIL */
+    .hero{padding:22px 20px 16px;text-align:center;transition:background .4s}
+    .hero.train{background:radial-gradient(ellipse 90% 55% at 50% 0%,rgba(10,132,255,.14) 0%,transparent 70%)}
+    .hero.comp {background:radial-gradient(ellipse 90% 55% at 50% 0%,rgba(255,159,10,.14) 0%,transparent 70%)}
+    .hero h1{font-size:1.85rem;font-weight:800;letter-spacing:-.03em;line-height:1.1;margin-bottom:8px}
+    .hero p{font-size:.84rem;color:var(--label2);line-height:1.5}
+    .mode-card{margin:0 16px 4px;background:var(--bg2);border-radius:16px;padding:16px}
+    .mode-card-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--label2);margin-bottom:12px;text-align:center}
+    .mode-toggle{position:relative;display:grid;grid-template-columns:1fr 1fr;background:var(--bg3);border-radius:11px;padding:3px}
+    .mode-toggle-pill{position:absolute;top:3px;left:3px;width:calc(50% - 3px);height:calc(100% - 6px);
+      background:var(--bg2);border-radius:9px;box-shadow:0 2px 12px rgba(0,0,0,.5);
+      transition:transform .28s cubic-bezier(.34,1.2,.64,1);pointer-events:none}
+    .mode-toggle-pill.right{transform:translateX(100%)}
+    .mode-btn{padding:11px 8px;border:none;border-radius:9px;font-size:.86rem;font-weight:700;
+      font-family:inherit;cursor:pointer;background:transparent;color:var(--label2);
+      position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:6px;transition:color .25s}
+    .mode-btn.active.training{color:var(--blue)}
+    .mode-btn.active.competition{color:var(--orange)}
+    .mode-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+    .mig-item{background:var(--bg3);border-radius:10px;padding:11px}
+    .mig-icon{font-size:1.15rem;margin-bottom:5px}.mig-title{font-size:.75rem;font-weight:700;margin-bottom:2px}
+    .mig-desc{font-size:.66rem;color:var(--label2);line-height:1.45}
+    .cta-btn{display:flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:14px;
+      padding:15px;font-size:.95rem;font-weight:700;font-family:inherit;width:100%;cursor:pointer;color:#fff;
+      transition:transform .13s,opacity .13s,background .3s}
+    .cta-btn:active{transform:scale(.97);opacity:.88}
+    .cta-train{background:var(--blue);box-shadow:0 4px 22px rgba(10,132,255,.35)}
+    .cta-comp {background:var(--orange);box-shadow:0 4px 22px rgba(255,159,10,.35)}
+
+    /* ══════════════════════
+       SESSION (Timer + Scores + Tireur)
+    ══════════════════════ */
+    /* Tireur switcher */
+    .tireur-switcher{display:flex;align-items:center;gap:10px;
+      background:var(--bg2);border-radius:14px;padding:10px 12px;margin-bottom:10px}
+    .ts-arrow{width:36px;height:36px;border-radius:10px;border:none;
+      background:var(--bg3);color:var(--label);font-size:1.1rem;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s,transform .12s}
+    .ts-arrow:active{background:var(--bg4);transform:scale(.92)}
+    .ts-arrow:disabled{opacity:.25;pointer-events:none}
+    .ts-center{flex:1;text-align:center}
+    .ts-name{font-size:.95rem;font-weight:700}
+    .ts-meta{font-size:.72rem;color:var(--label2);margin-top:2px}
+    .ts-dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:5px;vertical-align:middle}
+    .ts-dot.train{background:var(--blue)}.ts-dot.comp{background:var(--orange)}
+
+    /* Phase card — NO SCROLL */
+    .phase-card{background:var(--bg2);border-radius:14px;padding:12px 14px;margin-bottom:10px;
+      display:flex;align-items:center;gap:12px}
+    .phase-icon-big{width:42px;height:42px;border-radius:11px;flex-shrink:0;
+      display:flex;align-items:center;justify-content:center;font-size:1.3rem;transition:background .3s}
+    .pi-prep{background:rgba(90,200,250,.15)}.pi-ready{background:rgba(255,159,10,.15)}.pi-fire{background:rgba(255,69,58,.15)}.pi-idle{background:var(--bg3)}
+    .phase-body{flex:1}
+    .phase-name{font-size:.9rem;font-weight:700}
+    .phase-sub{font-size:.72rem;color:var(--label2);margin-top:2px}
+    /* Phase global progress bar */
+    .phase-progress-wrap{margin-top:6px;height:3px;background:var(--bg3);border-radius:99px;overflow:hidden}
+    .phase-progress-bar{height:100%;border-radius:99px;transition:width .5s,background .3s;background:var(--blue)}
+    .phase-counter{font-size:.7rem;font-weight:700;color:var(--label2);flex-shrink:0;text-align:right}
+
+    /* Timer ring */
+    .timer-card{background:var(--bg2);border-radius:16px;padding:16px 16px 14px;
+      text-align:center;position:relative;overflow:hidden;margin-bottom:10px}
+    .timer-glow{position:absolute;top:-50px;left:50%;transform:translateX(-50%);
+      width:220px;height:220px;border-radius:50%;pointer-events:none;transition:background .4s}
+    .timer-glow.train{background:radial-gradient(circle,rgba(10,132,255,.15) 0%,transparent 65%)}
+    .timer-glow.comp {background:radial-gradient(circle,rgba(255,159,10,.15) 0%,transparent 65%)}
+    .timer-glow.urgent{background:radial-gradient(circle,rgba(255,69,58,.22) 0%,transparent 65%) !important}
+    /* Series dots */
+    .series-dots{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px}
+    .sdot{width:8px;height:8px;border-radius:50%;background:var(--bg4);transition:all .3s cubic-bezier(.34,1.4,.64,1)}
+    .sdot.done{background:var(--green)}
+    .sdot.active-dot{transform:scale(1.6)}
+    .sdot.active-dot.train{background:var(--blue);box-shadow:0 0 10px rgba(10,132,255,.7)}
+    .sdot.active-dot.comp {background:var(--orange);box-shadow:0 0 10px rgba(255,159,10,.7)}
+    .sdot-label{font-size:.58rem;color:var(--label3);font-weight:600}
+    .ring-wrap{width:140px;height:140px;margin:0 auto 10px;position:relative}
+    .ring-wrap svg{transform:rotate(-90deg)}
+    .ring-bg{fill:none;stroke:var(--bg3);stroke-width:11}
+    .ring-fill{fill:none;stroke:url(#iGrad);stroke-width:11;stroke-linecap:round;
+      stroke-dasharray:408;stroke-dashoffset:408;transition:stroke-dashoffset .9s linear,filter .4s}
+    .ring-fill.urgent-ring{animation:ringPulse 1s infinite alternate;filter:drop-shadow(0 0 10px rgba(255,69,58,.8))}
+    @keyframes ringPulse{from{filter:drop-shadow(0 0 6px rgba(255,69,58,.5))}to{filter:drop-shadow(0 0 16px rgba(255,69,58,.95))}}
+    .ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+    #timer-display{font-size:2.8rem;font-weight:800;letter-spacing:-.04em;font-variant-numeric:tabular-nums;line-height:1;transition:color .3s}
+    .timer-unit{font-size:.65rem;font-weight:600;color:var(--label2);margin-top:3px;text-transform:uppercase;letter-spacing:.07em}
+    #timer-tireur{font-size:.78rem;color:var(--label2);min-height:.9em;margin-bottom:10px}
+    .timer-btns{display:flex;gap:8px}
+    .ibtn{flex:1;padding:13px;border:none;border-radius:13px;font-size:.88rem;font-weight:700;
+      font-family:inherit;cursor:pointer;transition:transform .13s,opacity .13s,background .3s;
+      display:flex;align-items:center;justify-content:center;gap:6px}
+    .ibtn:active{transform:scale(.96);opacity:.85}
+    .ibtn-fill{background:var(--bg3);color:var(--label)}
+    .ibtn-train{background:var(--blue);color:#fff}
+    .ibtn-comp {background:var(--orange);color:#fff}
+
+    /* Score steppers inline */
+    .score-section-title{font-size:.7rem;font-weight:700;text-transform:uppercase;
+      letter-spacing:.09em;color:var(--label2);padding:4px 0 8px;
+      display:flex;align-items:center;justify-content:space-between}
+    .score-total-chip{font-size:.72rem;font-weight:800;padding:3px 10px;border-radius:99px}
+    .stc-train{background:rgba(10,132,255,.15);color:var(--blue)}
+    .stc-comp {background:rgba(255,159,10,.15);color:var(--orange)}
+    .score-card{background:var(--bg2);border-radius:14px;overflow:hidden;margin-bottom:8px}
+    .serie-row{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid var(--sep)}
+    .serie-row:last-child{border-bottom:none}
+    .sr-label{font-size:.72rem;font-weight:700;color:var(--label2);width:24px;flex-shrink:0}
+    .sr-dist{font-size:.65rem;color:var(--label3);flex:1;min-width:0}
+    .stepper{display:flex;align-items:center;background:var(--bg3);border-radius:9px;overflow:hidden}
+    .stepper-btn{width:34px;height:32px;border:none;background:none;color:var(--label);
+      font-size:1.05rem;cursor:pointer;display:flex;align-items:center;justify-content:center;
+      transition:background .15s;flex-shrink:0}
+    .stepper-btn:active{background:var(--bg4)}
+    .stepper-val{min-width:26px;text-align:center;font-size:.88rem;font-weight:700}
+    .sr-pts{font-size:.7rem;color:var(--label2);min-width:34px;text-align:right;flex-shrink:0}
+
+    /* TIREURS PAGE */
+    .tireurs-wrap{padding:16px}
+    .ios-field{background:var(--bg2);border-radius:14px;display:flex;align-items:center;gap:10px;padding:4px 4px 4px 14px;margin-bottom:14px}
+    .ios-field input{flex:1;background:none;border:none;outline:none;color:var(--label);font-size:.92rem;font-family:inherit;padding:11px 0}
+    .ios-field input::placeholder{color:var(--label3)}
+    .ios-add-btn{border:none;border-radius:10px;padding:10px 16px;font-size:.82rem;font-weight:700;
+      font-family:inherit;cursor:pointer;color:#fff;transition:background .3s,transform .12s;white-space:nowrap}
+    .ios-add-btn:active{transform:scale(.95)}
+    .ios-add-train{background:var(--blue)}.ios-add-comp{background:var(--orange)}
+    #tireurs-ul{list-style:none}
+    #tireurs-ul li{display:flex;align-items:center;gap:12px;background:var(--bg2);padding:12px 14px;
+      border-bottom:1px solid var(--sep);cursor:pointer;transition:background .15s}
+    #tireurs-ul li:first-child{border-radius:14px 14px 0 0}
+    #tireurs-ul li:last-child{border-bottom:none;border-radius:0 0 14px 14px}
+    #tireurs-ul li:only-child{border-radius:14px}
+    #tireurs-ul li.active.t{background:rgba(10,132,255,.1)}
+    #tireurs-ul li.active.c{background:rgba(255,159,10,.08)}
+    #tireurs-ul li:active:not(.active){background:var(--bg3)}
+    .t-av{width:38px;height:38px;border-radius:50%;flex-shrink:0;
+      background:linear-gradient(135deg,var(--blue),var(--purple));
+      display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.92rem;color:#fff;transition:background .3s}
+    .t-av.on.train{background:linear-gradient(135deg,var(--blue),var(--teal))}
+    .t-av.on.comp {background:linear-gradient(135deg,var(--orange),#ff6b35)}
+    .t-info{flex:1}.t-name{font-size:.9rem;font-weight:600}
+    .t-pts{font-size:.72rem;color:var(--label2);margin-top:2px}
+    .t-status-train{font-size:.68rem;color:var(--blue);font-weight:600;margin-top:2px}
+    .t-status-comp {font-size:.68rem;color:var(--orange);font-weight:600;margin-top:2px}
+    .t-del{background:none;border:none;color:var(--bg4);cursor:pointer;font-size:.95rem;padding:6px;border-radius:8px;transition:color .2s}
+    .t-del:active{color:var(--red)}
+    #series-tabs{display:none}
+
+    /* CLASSEMENT */
+    .class-wrap{padding:16px}
+    .mode-pills{display:flex;gap:8px;margin-bottom:14px}
+    .mpill{flex:1;padding:9px 8px;border-radius:99px;font-size:.76rem;font-weight:700;
+      border:1.5px solid var(--sep);color:var(--label2);cursor:pointer;text-align:center;
+      transition:all .22s;background:var(--bg2)}
+    .mpill.active.t{border-color:var(--blue);color:var(--blue);background:rgba(10,132,255,.1)}
+    .mpill.active.c{border-color:var(--orange);color:var(--orange);background:rgba(255,159,10,.1)}
+    .rank-card{background:var(--bg2);border-radius:14px;overflow:hidden;margin-bottom:8px;
+      display:flex;align-items:center;gap:12px;padding:12px 14px;animation:fadeSlide .3s ease}
+    @keyframes fadeSlide{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+    .rank-medal{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;
+      justify-content:center;font-weight:800;font-size:.82rem;flex-shrink:0}
+    .medal-1{background:rgba(255,214,0,.2);color:#ffd700}
+    .medal-2{background:rgba(192,192,192,.2);color:#c0c0c0}
+    .medal-3{background:rgba(205,127,50,.2);color:#cd7f32}
+    .medal-n{background:var(--bg4);color:var(--label2)}
+    .rank-info{flex:1}
+    .rank-name{font-size:.9rem;font-weight:700}
+    .rank-series{font-size:.7rem;color:var(--label2);margin-top:3px;display:flex;gap:6px;flex-wrap:wrap}
+    .rank-series span{background:var(--bg3);padding:2px 7px;border-radius:99px}
+    .rank-total{text-align:right}
+    .rank-pts{font-size:1.2rem;font-weight:800;line-height:1}
+    .rank-pct{font-size:.65rem;color:var(--label2);margin-top:2px}
+    /* mini bar */
+    .rank-bar-wrap{height:3px;background:var(--bg3);border-radius:99px;overflow:hidden;margin-top:6px}
+    .rank-bar{height:100%;border-radius:99px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+
+    /* HISTORIQUE */
+    .hist-wrap{padding:16px}
+    #history-container{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+    .hist-item{background:var(--bg2);border-radius:14px;padding:14px;display:flex;align-items:flex-start;gap:12px;animation:fadeSlide .3s ease}
+    .hist-av{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:800;background:linear-gradient(135deg,var(--green),var(--teal))}
+    .hist-body{flex:1}
+    .hist-header{display:flex;align-items:center;gap:7px;margin-bottom:5px;flex-wrap:wrap}
+    .hist-name{font-size:.88rem;font-weight:700}
+    .hist-tag{font-size:.6rem;font-weight:700;padding:2px 7px;border-radius:99px}
+    .tag-train{background:rgba(10,132,255,.15);color:var(--blue);border:1px solid rgba(10,132,255,.25)}
+    .tag-comp {background:rgba(255,159,10,.15);color:var(--orange);border:1px solid rgba(255,159,10,.25)}
+    .hist-detail{font-size:.71rem;color:var(--label2);line-height:1.8}
+    .hist-total{color:var(--green);font-weight:700;font-size:.78rem}
+    .hist-del{background:none;border:none;color:var(--bg4);cursor:pointer;font-size:.9rem;padding:4px;transition:color .2s}
+    .hist-del:active{color:var(--red)}
+    .empty-state{text-align:center;padding:40px 0;color:var(--label2)}
+    .empty-state div{font-size:2.8rem;margin-bottom:10px;opacity:.35}.empty-state p{font-size:.85rem}
+    .export-btn{display:flex;align-items:center;justify-content:center;gap:8px;
+      background:var(--bg2);border:none;border-radius:14px;padding:15px;
+      font-size:.9rem;font-weight:700;font-family:inherit;width:100%;cursor:pointer;transition:opacity .15s,color .3s}
+    .export-btn.train{color:var(--blue)}.export-btn.comp{color:var(--orange)}
+    .export-btn:active{opacity:.6}
+
+    /* TOAST */
+    #message{position:fixed;bottom:calc(var(--tab-h) + 14px);left:50%;
+      transform:translateX(-50%) translateY(6px);
+      background:rgba(44,44,46,.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+      color:var(--label);padding:10px 22px;border-radius:99px;font-size:.83rem;font-weight:600;
+      white-space:nowrap;opacity:0;pointer-events:none;transition:all .24s;z-index:500;border:1px solid var(--sep)}
+    #message.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+    select#mode-selector{display:none}
+
+    /* ══ HISTORY V2 : groupes par jour ══ */
+    .hist-day-group{margin-bottom:18px}
+    .hist-day-header{display:flex;align-items:center;justify-content:space-between;
+      padding:6px 4px 8px;margin-bottom:6px}
+    .hist-day-label{font-size:.72rem;font-weight:800;text-transform:uppercase;
+      letter-spacing:.07em;color:var(--label2)}
+    .hist-day-del{background:none;border:1px solid rgba(255,69,58,.3);
+      border-radius:8px;color:var(--red);font-size:.68rem;font-weight:700;
+      padding:4px 10px;cursor:pointer;transition:all .15s}
+    .hist-day-del:active{background:rgba(255,69,58,.15)}
+    /* item */
+    .hist-item{background:var(--bg2);border-radius:14px;padding:12px 14px;
+      display:flex;align-items:flex-start;gap:11px;animation:fadeSlide .3s ease;
+      margin-bottom:7px;border:1px solid transparent;transition:border-color .2s}
+    .hist-item.editing{border-color:var(--blue)}
+    .hist-av{width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;
+      align-items:center;justify-content:center;font-size:.88rem;font-weight:800;
+      background:linear-gradient(135deg,var(--green),var(--teal))}
+    .hist-body{flex:1;min-width:0}
+    .hist-header{display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap}
+    .hist-custom-name{font-size:.88rem;font-weight:700;flex:1;cursor:pointer}
+    .hist-custom-name:empty::before{content:"Série sans nom";color:var(--label3)}
+    .hist-name-input{flex:1;background:var(--bg3);border:1.5px solid var(--blue);
+      border-radius:8px;padding:5px 10px;color:var(--label);font-size:.88rem;
+      font-family:inherit;outline:none;min-width:0}
+    .hist-tag{font-size:.6rem;font-weight:700;padding:2px 7px;border-radius:99px}
+    .tag-train{background:rgba(10,132,255,.15);color:var(--blue);border:1px solid rgba(10,132,255,.25)}
+    .tag-comp {background:rgba(255,159,10,.15);color:var(--orange);border:1px solid rgba(255,159,10,.25)}
+    .hist-time{font-size:.62rem;color:var(--label3)}
+    .hist-detail{font-size:.71rem;color:var(--label2);line-height:1.8}
+    .hist-total{color:var(--green);font-weight:700;font-size:.78rem}
+    .hist-actions{display:flex;flex-direction:column;gap:6px;flex-shrink:0}
+    .hist-btn{background:none;border:none;cursor:pointer;padding:5px;
+      border-radius:7px;font-size:.9rem;transition:background .15s,transform .12s}
+    .hist-btn:active{transform:scale(.88)}
+    .hist-btn-edit{color:var(--blue)}
+    .hist-btn-del{color:var(--label3)}.hist-btn-del:active{color:var(--red)}
+    .hist-btn-save{color:var(--green)}
+    .hist-btn-cancel{color:var(--label3)}
+    .hist-edit-row{display:none;align-items:center;gap:6px;margin-top:6px}
+    .hist-edit-row.show{display:flex}
+
+    /* ══ BOTTOM SHEET ══ */
+    .sheet-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:700;
+      opacity:0;pointer-events:none;transition:opacity .28s;
+      backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+    .sheet-overlay.open{opacity:1;pointer-events:auto}
+    .sheet{position:fixed;bottom:0;left:0;right:0;z-index:800;
+      background:#1c1c1e;border-radius:22px 22px 0 0;
+      padding-bottom:env(safe-area-inset-bottom,20px);
+      transform:translateY(100%);
+      transition:transform .32s cubic-bezier(.32,1,.58,1)}
+    .sheet.open{transform:translateY(0)}
+    .sheet-handle{width:36px;height:4px;border-radius:99px;background:#3a3a3c;margin:12px auto 0}
+    .sheet-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px 8px}
+    .sheet-title{font-size:.95rem;font-weight:700;color:#fff}
+    .sheet-close{background:#2c2c2e;border:none;border-radius:50%;width:28px;height:28px;
+      display:flex;align-items:center;justify-content:center;cursor:pointer;
+      color:rgba(255,255,255,.55);font-size:.8rem}
+    .sheet-list{max-height:55vh;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:6px 12px 12px}
+    .s-item{display:flex !important;flex-direction:row !important;align-items:center !important;
+      gap:12px;padding:11px 12px;border-radius:13px;cursor:pointer;
+      margin-bottom:5px;transition:background .15s}
+    .s-item:active{background:#2c2c2e}
+    .s-item.sel-t{background:rgba(10,132,255,.13)}
+    .s-item.sel-c{background:rgba(255,159,10,.11)}
+    .s-av{width:40px;height:40px;min-width:40px;border-radius:50%;
+      display:flex !important;align-items:center !important;justify-content:center !important;
+      font-weight:800;font-size:.95rem;color:#fff;flex-shrink:0 !important;
+      background:linear-gradient(135deg,#3a3a3c,#2c2c2e)}
+    .s-av.sel-t{background:linear-gradient(135deg,#0a84ff,#5ac8fa)}
+    .s-av.sel-c{background:linear-gradient(135deg,#ff9f0a,#ff6b35)}
+    .s-info{flex:1;min-width:0}
+    .s-name{font-size:.9rem;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .s-pts{font-size:.7rem;color:rgba(255,255,255,.5);margin-top:2px}
+    .s-check{color:#0a84ff;font-size:1rem;font-weight:700;flex-shrink:0;
+      opacity:0;transition:opacity .2s}
+    .s-check.vis{opacity:1}
+    body.competition .s-check.vis{color:#ff9f0a}
+    .ts-tap-hint{font-size:.62rem;color:rgba(255,255,255,.3);margin-top:2px;letter-spacing:.02em}
+  </style>
+</head>
+<body>
+
+<div id="splash"><div class="splash-icon">🎯</div><div class="splash-title">Tir Gong 821</div><div class="splash-sub">Gestion de compétition</div></div>
+<div id="flash"></div>
+
+<!-- BOTTOM SHEET TIREURS -->
+<div class="sheet-overlay" id="sheet-overlay" onclick="closeSheet()"></div>
+<div class="sheet" id="tireur-sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <span class="sheet-title">Sélectionner un tireur</span>
+    <button class="sheet-close" onclick="closeSheet()">✕</button>
+  </div>
+  <div class="sheet-list" id="sheet-list"></div>
+</div>
+
+
+<div class="navbar">
+  <div class="navbar-title">Tir Gong <span style="opacity:.45">821</span></div>
+  <div class="navbar-badge badge-train" id="navbar-badge">🏋️ Entraînement</div>
+</div>
+<select id="mode-selector"><option value="training">Entraînement</option><option value="competition">Compétition</option></select>
+<div id="message"></div>
+
+<div class="pages" id="pages-container">
+
+  <!-- ACCUEIL -->
+  <div class="page active" id="page-home">
+    <div class="hero train" id="hero-bg">
+      <h1>Gestion tir<br><span id="hero-label" style="color:var(--blue);transition:color .3s">Gong 821</span></h1>
+      <p>Gérez vos tireurs, lancez les séries et consultez le classement en direct.</p>
+    </div>
+    <div class="mode-card">
+      <div class="mode-card-title">Mode de jeu</div>
+      <div class="mode-toggle">
+        <div class="mode-toggle-pill" id="toggle-pill"></div>
+        <button class="mode-btn active training" id="btn-training"    onclick="setMode('training')">🏋️ Entraînement</button>
+        <button class="mode-btn competition"     id="btn-competition" onclick="setMode('competition')">🏆 Compétition</button>
+      </div>
+      <div class="mode-info-grid" id="mode-info-grid"></div>
+    </div>
+    <div style="margin:0 16px 4px">
+      <div class="slabel">Règles 821</div>
+      <div class="ios-group">
+        <div class="ios-row"><div class="row-icon ri-blue">📋</div><div class="row-body"><div class="row-title">4 séries par tireur</div><div class="row-sub">Chaque tireur effectue 4 séries de tir</div></div></div>
+        <div class="ios-row"><div class="row-icon ri-orange">🎯</div><div class="row-body"><div class="row-title">Cibles par série</div><div class="row-sub">Jusqu'à 5 cibles à 50 m + 5 cibles à 25 m</div></div></div>
+        <div class="ios-row"><div class="row-icon ri-green">✅</div><div class="row-body"><div class="row-title">1 cible = 10 points</div><div class="row-sub">Score max par série : 100 pts</div></div></div>
+        <div class="ios-row"><div class="row-icon ri-red">🏆</div><div class="row-body"><div class="row-title">Score total</div><div class="row-sub">Somme des 4 séries — max 400 pts</div></div></div>
+      </div>
+    </div>
+    <div style="margin:0 16px 4px">
+      <div class="slabel">Séquence</div>
+      <div class="ios-group">
+        <div class="ios-row"><div class="row-icon ri-teal" style="font-weight:800;font-size:.78rem">1</div><div class="row-body"><div class="row-title">Préparation — 60 s</div><div class="row-sub">Mise en condition</div></div></div>
+        <div class="ios-row"><div class="row-icon ri-orange" style="font-weight:800;font-size:.78rem">2</div><div class="row-body"><div class="row-title">Mise en place — 7 s</div><div class="row-sub">Installation sur le pas de tir</div></div></div>
+        <div class="ios-row"><div class="row-icon ri-red" style="font-weight:800;font-size:.78rem">3</div><div class="row-body"><div class="row-title">Tir — 20 à 30 s</div><div class="row-sub">Selon la série en cours</div></div></div>
+      </div>
+    </div>
+    <div style="margin:0 16px;padding-top:4px">
+      <button class="cta-btn cta-train" id="cta-start" onclick="switchTab('page-session')">▶ Lancer une session</button>
+    </div>
+    <div style="height:18px"></div>
+  </div>
+
+  <!-- SESSION (Timer + Scores + Tireur switcher) -->
+  <div class="page" id="page-session">
+    <div class="wrap">
+      <!-- Tireur switcher -->
+      <div class="tireur-switcher">
+        <button class="ts-arrow" id="ts-prev" onclick="switchTireur(-1)">‹</button>
+        <div class="ts-center" onclick="openSheet()">
+          <div class="ts-name" id="ts-name"><span style="color:var(--label3)">Aucun tireur</span></div>
+          <div class="ts-meta" id="ts-meta">Ajoutez un tireur dans l'onglet 👤</div>
+          <div class="ts-tap-hint" id="ts-tap-hint"></div>
+        </div>
+        <button class="ts-arrow" id="ts-next" onclick="switchTireur(+1)">›</button>
+      </div>
+
+      <!-- Phase card (NO SCROLL) -->
+      <div class="phase-card" id="phase-card">
+        <div class="phase-icon-big pi-idle" id="phase-icon">⏸</div>
+        <div class="phase-body">
+          <div class="phase-name" id="phase-name-el">En attente</div>
+          <div class="phase-sub" id="phase-sub-el">Sélectionnez un tireur et démarrez</div>
+          <div class="phase-progress-wrap"><div class="phase-progress-bar" id="phase-prog-bar" style="width:0%"></div></div>
+        </div>
+        <div class="phase-counter" id="phase-counter">—</div>
+      </div>
+
+      <!-- Timer card -->
+      <div class="timer-card">
+        <div class="timer-glow train" id="timer-glow"></div>
+        <div class="series-dots">
+          <span class="sdot-label">S0</span>
+          <div class="sdot" id="sdot-0"></div><div class="sdot" id="sdot-1"></div>
+          <div class="sdot" id="sdot-2"></div><div class="sdot" id="sdot-3"></div>
+          <div class="sdot" id="sdot-4"></div>
+        </div>
+        <div class="ring-wrap">
+          <svg width="140" height="140" viewBox="0 0 140 140">
+            <defs>
+              <linearGradient id="iGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#0a84ff" id="gStop1"/>
+                <stop offset="100%" stop-color="#5ac8fa" id="gStop2"/>
+              </linearGradient>
+            </defs>
+            <circle class="ring-bg" cx="70" cy="70" r="65"/>
+            <circle class="ring-fill" id="ring-fill-el" cx="70" cy="70" r="65"/>
+          </svg>
+          <div class="ring-center">
+            <div id="timer-display">0</div>
+            <div class="timer-unit">secondes</div>
+          </div>
+        </div>
+        <div id="timer-tireur"></div>
+        <div class="timer-btns">
+          <button class="ibtn ibtn-train" id="start-btn">▶ Démarrer</button>
+          <button class="ibtn ibtn-fill"  id="reset-btn">↺ Reset</button>
+        </div>
+      </div>
+
+      <!-- Score steppers pour le tireur actif -->
+      <div id="session-scores-wrap" style="display:none">
+        <div class="score-section-title">
+          <span>Saisie des scores</span>
+          <span class="score-total-chip stc-train" id="session-total-chip">0 pts</span>
+        </div>
+        <div class="score-card" id="session-score-card"></div>
+      </div>
+      <div style="height:16px"></div>
+    </div>
+  </div>
+
+  <!-- TIREURS -->
+  <div class="page" id="page-tireurs">
+    <div class="tireurs-wrap">
+      <div class="slabel">Ajouter un tireur</div>
+      <div class="ios-field">
+        <span style="font-size:1.1rem">👤</span>
+        <input type="text" id="tireur-name" placeholder="Nom du tireur…" autocomplete="off">
+        <button class="ios-add-btn ios-add-train" id="add-tireur-btn">＋ Ajouter</button>
+      </div>
+      <div class="slabel">Tireurs inscrits</div>
+      <div class="ios-group"><ul id="tireurs-ul"></ul></div>
+      <div id="series-tabs"></div>
+    </div>
+  </div>
+
+  <!-- CLASSEMENT -->
+  <div class="page" id="page-scores">
+    <div class="class-wrap">
+      <div class="mode-pills">
+        <div class="mpill active t" id="pill-train" onclick="setMode('training')">🏋️ Entraînement</div>
+        <div class="mpill c"        id="pill-comp"  onclick="setMode('competition')">🏆 Compétition</div>
+      </div>
+      <div id="ranking-container"></div>
+    </div>
+    <!-- hidden table for PDF -->
+    <div style="display:none"><table id="score-table"><thead><tr></tr></thead><tbody></tbody></table></div>
+  </div>
+
+  <!-- HISTORIQUE -->
+  <div class="page" id="page-history">
+    <div class="hist-wrap">
+      <div class="slabel">Résultats enregistrés</div>
+      <div id="history-container"><div class="empty-state"><div>📭</div><p>Aucun résultat pour l'instant</p></div></div>
+      <button class="export-btn train" id="export-pdf-btn">⬇ Exporter en PDF</button>
+    </div>
+  </div>
+</div>
+
+<nav class="tabbar">
+  <div class="tab active t-train" data-page="page-home">   <div class="tab-icon">🏠</div><div class="tab-label">Accueil</div></div>
+  <div class="tab t-train"        data-page="page-session"><div class="tab-icon">🎯</div><div class="tab-label">Session</div></div>
+  <div class="tab t-train"        data-page="page-tireurs"><div class="tab-icon">👤</div><div class="tab-label">Tireurs</div></div>
+  <div class="tab t-train"        data-page="page-scores"> <div class="tab-icon">📊</div><div class="tab-label">Classement</div></div>
+  <div class="tab t-train"        data-page="page-history"><div class="tab-icon">📋</div><div class="tab-label">Résultats</div></div>
+</nav>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+<script>
+console.log("JS chargé OK");
+
+// ==== CONFIG SÉRIES ====
+const SERIES = [
+  { name: "Série 1", gongs: 10 },
+  { name: "Série 2", gongs: 10 },
+  { name: "Série 3", gongs: 10 },
+  { name: "Série 4", gongs: 10 }
+];
+
+// ==== CONFIG TIMER GLOBAL ====
+const SERIES_TIMER_CONFIG = [
+  { label: "Série 0 (Entraînement)", shootTime: 30 },
+  { label: "Série 1", shootTime: 30 },
+  { label: "Série 2", shootTime: 30 },
+  { label: "Série 3", shootTime: 20 },
+  { label: "Série 4", shootTime: 20 }
+];
+
+// Génération des phases : pour chaque série -> prep 60s, ready 7s, fire shootTime
+const PHASES = [];
+SERIES_TIMER_CONFIG.forEach((serie, index) => {
+  PHASES.push({
+    type: "prep",
+    duration: 60,
+    text: `Préparation ${serie.label}`,
+    sound: "prep",
+    serieIndexForScores: index
+  });
+  PHASES.push({
+    type: "ready",
+    duration: 7,
+    text: `Mise en place ${serie.label}`,
+    sound: "ready",
+    serieIndexForScores: index
+  });
+  PHASES.push({
+    type: "fire",
+    duration: serie.shootTime,
+    text: `Tir ${serie.label}`,
+    sound: "fire",
+    endSound: "stop",
+    serieIndexForScores: index
+  });
+});
+
+// ==== VARIABLES ====
+let tireurs = [];
+let currentTireurIndex = null;
+let timer = 0;
+let timerInterval = null;
+let currentPhaseIndex = -1;
+
+// ==== ELEMENTS DOM ====
+const tireurNameInput = document.getElementById("tireur-name");
+const addTireurBtn = document.getElementById("add-tireur-btn");
+const tireursUl = document.getElementById("tireurs-ul");
+const seriesTabs = document.getElementById("series-tabs");
+const startBtn = document.getElementById("start-btn");
+const resetBtn = document.getElementById("reset-btn");
+const timerDisplay = document.getElementById("timer-display");
+const timerBar = document.querySelector(".timer-bar");
+const timerTireur = document.getElementById("timer-tireur");
+const exportPdfBtn = document.getElementById("export-pdf-btn");
+const messageDiv = document.getElementById("message");
+const historyContainer = document.getElementById("history-container");
+const scoreTable = document.getElementById("score-table");
+const currentSeriesLabel = document.getElementById("current-series-label");
+const modeSelector = document.getElementById("mode-selector");
+
+// ==== AUDIO ====
+const soundPrep = new Audio("./prep.mp3");
+const soundReady = new Audio("./ready.mp3");
+const soundFire = new Audio("./fire.mp3");
+const soundStop = new Audio("./stop.mp3");
+
+// ==== INIT ====
+document.addEventListener("DOMContentLoaded", () => {
+  renderTabs();
+  renderTireurs();
+  renderScoreTable();
+  resetTimerGlobal();
+  updateCurrentSeriesLabel();
+
+  if (modeSelector) {
+    modeSelector.addEventListener("change", () => {
+      renderScoreTable();
+    });
+  }
+});
+
+// ==== OUTILS ====
+function getMode() {
+  return modeSelector ? modeSelector.value : "training";
+}
+
+function getSeriePoints(score, mode) {
+  if (mode === "competition") {
+    return (score.cibles || 0) * 10;
+  }
+  return ((score.dist50 || 0) + (score.dist25 || 0)) * 10;
+}
+
+function playSound(name) {
+  const map = {
+    prep: soundPrep,
+    ready: soundReady,
+    fire: soundFire,
+    stop: soundStop
+  };
+  const s = map[name];
+  if (!s) return;
+  try {
+    s.currentTime = 0;
+    s.play();
+  } catch (_) {}
+}
+
+// ==== TIMER GLOBAL PAR PHASES ====
+function startTimer() {
+  if (currentTireurIndex === null) {
+    showMessage("Sélectionnez un tireur !");
+    return;
+  }
+
+  if (currentPhaseIndex !== -1 && currentPhaseIndex < PHASES.length) {
+    showMessage("Timer déjà en cours");
+    return;
+  }
+
+  currentPhaseIndex = 0;
+  launchCurrentPhase();
+}
+
+function launchCurrentPhase() {
+  if (currentPhaseIndex < 0 || currentPhaseIndex >= PHASES.length) {
+    showMessage("Séquence terminée pour ce tireur");
+    clearInterval(timerInterval);
+    currentPhaseIndex = -1;
+    updateCurrentSeriesLabel();
+    return;
+  }
+
+  const phase = PHASES[currentPhaseIndex];
+  timer = phase.duration;
+  updateTimerDisplay();
+  updateTimerBar();
+  updatePhaseLabel(phase);
+
+  if (phase.sound) playSound(phase.sound);
+
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    timer--;
+    updateTimerDisplay();
+    updateTimerBar();
+
+    if (timer <= 0) {
+      clearInterval(timerInterval);
+
+      if (phase.endSound) playSound(phase.endSound);
+
+      if (phase.type === "fire" && phase.serieIndexForScores === 4) {
+        saveHistory();
+      }
+
+      if (phase.type === "fire") {
+        setTimeout(() => {
+          currentPhaseIndex++;
+          launchCurrentPhase();
+        }, 2000);
+      } else {
+        currentPhaseIndex++;
+        launchCurrentPhase();
+      }
+    }
+  }, 1000);
+}
+
+function updatePhaseLabel(phase) {
+  if (!currentSeriesLabel) return;
+
+  const idx = phase.serieIndexForScores;
+  let serieText = "";
+
+  if (idx === 0) {
+    serieText = "Entraînement";
+  } else if (idx >= 1 && idx <= 4) {
+    serieText = `Série ${idx}`;
+  }
+
+  let phaseName = "";
+  if (phase.type === "prep") phaseName = "Préparation";
+  else if (phase.type === "ready") phaseName = "Mise en place";
+  else if (phase.type === "fire") phaseName = "Tir";
+
+  currentSeriesLabel.textContent = `${serieText ? serieText + " – " : ""}${phaseName} (${timer}s)`;
+}
+
+function updateTimerDisplay() {
+  timerDisplay.textContent = `${timer}s`;
+}
+
+function updateTimerBar() {
+  const phase = PHASES[currentPhaseIndex];
+  if (!phase || !timerBar) {
+    if (timerBar) timerBar.style.width = "0%";
+    return;
+  }
+  const percent = Math.max(0, (timer / phase.duration) * 100);
+  if (timerBar) timerBar.style.width = percent + "%";
+}
+
+// Reset complet du timer global
+function resetTimerGlobal() {
+  clearInterval(timerInterval);
+  currentPhaseIndex = -1;
+  timer = 0;
+  if (timerDisplay) timerDisplay.textContent = "0s";
+  if (timerBar) timerBar.style.width = "0%";
+  if (currentSeriesLabel) currentSeriesLabel.textContent = "";
+  updateCurrentSeriesLabel();
+}
+
+// Info générale
+function updateCurrentSeriesLabel() {
+  if (!currentSeriesLabel) return;
+  if (currentTireurIndex === null) {
+    currentSeriesLabel.textContent = "";
+    return;
+  }
+  if (currentPhaseIndex === -1) {
+    currentSeriesLabel.textContent = "Séquence prête";
+  }
+}
+
+// ==== MESSAGE TEMPORAIRE ====
+function showMessage(text) {
+  if (messageDiv) {
+    messageDiv.textContent = text;
+    setTimeout(() => { if (messageDiv) messageDiv.textContent = ""; }, 2000);
+  }
+}
+
+// ==== AJOUT TIREURS ====
+function addTireur() {
+  const name = tireurNameInput.value.trim();
+
+  if (!name) {
+    showMessage("Entrez un nom valide");
+    return;
+  }
+
+  if (tireurs.some((t) => t.name === name)) {
+    showMessage("Tireur déjà existant !");
+    return;
+  }
+
+  tireurs.push({
+    name,
+    scores: SERIES.map(() => ({
+      dist50: 0,
+      dist25: 0,
+      cibles: 0
+    }))
+  });
+
+  currentTireurIndex = tireurs.length - 1;
+  renderTireurs();
+  renderScoreTable();
+  renderScoreCards();
+  resetTimerGlobal();
+  tireurNameInput.value = "";
+}
+
+function renderTireurs() {
+  tireursUl.innerHTML = "";
+
+  tireurs.forEach((t, idx) => {
+    const li = document.createElement("li");
+    li.innerHTML = `<span>${t.name}</span> <button>Supprimer</button>`;
+
+    li.addEventListener("click", (e) => {
+      if (e.target.tagName === "BUTTON") return;
+      currentTireurIndex = idx;
+      renderTireurs();
+      resetTimerGlobal();
+    });
+
+    li.querySelector("button").addEventListener("click", (e) => {
+      e.stopPropagation();
+      tireurs.splice(idx, 1);
+      if (currentTireurIndex >= tireurs.length) {
+        currentTireurIndex = tireurs.length - 1;
+      }
+      renderTireurs();
+      renderScoreTable();
+      resetTimerGlobal();
+    });
+
+    li.classList.toggle("active", idx === currentTireurIndex);
+    tireursUl.appendChild(li);
+  });
+}
+
+// ==== SERIES ====
+function renderTabs() {
+  if (seriesTabs) {
+    seriesTabs.innerHTML = "";
+  }
+}
+
+// ==== HANDLER INPUTS TABLEAU ====
+function handleScoreInputChange(e) {
+  const raw = e.target.value.trim();
+  const name = e.target.getAttribute("data-name");
+  const serieIndex = parseInt(e.target.getAttribute("data-serie"), 10);
+  const field = e.target.getAttribute("data-field");
+  const tireur = tireurs.find(tt => tt.name === name);
+
+  if (!tireur) return;
+
+  if (raw === "") {
+    tireur.scores[serieIndex][field] = "";
+    renderScoreTable();
+    return;
+  }
+
+  let val = parseInt(raw, 10);
+  if (isNaN(val)) val = 0;
+
+  const max = parseInt(e.target.max, 10);
+  if (val < 0) val = 0;
+  if (val > max) val = max;
+
+  tireur.scores[serieIndex][field] = val;
+  renderScoreTable();
+}
+
+// ==== TABLEAU SCORES ====
+function renderScoreTable() {
+  if (!scoreTable) return;
+  const mode = getMode();
+  const thead = scoreTable.querySelector("thead tr");
+  const tbody = scoreTable.querySelector("tbody");
+
+  if (mode === "competition") {
+    thead.innerHTML =
+      `<th>#</th><th>Tireur</th>` +
+      SERIES.map((s) => `<th>${s.name}</th>`).join("") +
+      `<th>Total pts</th><th>%</th>`;
+  } else {
+    thead.innerHTML =
+      `<th>#</th><th>Tireur</th>` +
+      SERIES.map((s) => `<th colspan="3">${s.name}<br><span style="font-size:11px">50m | 25m</span></th>`).join("") +
+      `<th>Total pts</th><th>%</th>`;
+  }
+
+  tbody.innerHTML = "";
+
+  const rows = tireurs.map((t) => {
+    const serieScores = t.scores.map((s) => getSeriePoints(s, mode));
+    const total = serieScores.reduce((a, b) => a + b, 0);
+    const maxTotal = SERIES.length * 100;
+    const perc = maxTotal ? Math.round((total / maxTotal) * 100) : 0;
+    return { t, serieScores, total, perc };
+  });
+
+  rows.sort((a, b) => {
+    if (b.total !== a.total) return b.total - a.total;
+    for (let i = SERIES.length - 1; i >= 0; i--) {
+      if (b.serieScores[i] !== a.serieScores[i]) return b.serieScores[i] - a.serieScores[i];
+    }
+    return a.t.name.localeCompare(b.t.name, "fr", { sensitivity: "base" });
+  });
+
+  rows.forEach(({ t, serieScores, total, perc }, idx) => {
+    const tr = document.createElement("tr");
+    let html = `<td>${idx + 1}</td><td>${t.name}</td>`;
+
+    t.scores.forEach((s, serieIndex) => {
+      if (mode === "competition") {
+        const cibles = s.cibles || 0;
+        const pts = cibles * 10;
+        html += `<td><input type="number" min="0" max="10" value="${cibles}" data-name="${t.name}" data-serie="${serieIndex}" data-field="cibles" style="width:3.5em;text-align:center"><div style="font-size:11px;margin-top:4px;">${pts} pts</div></td>`;
+      } else {
+        const dist50 = s.dist50 || 0;
+        const dist25 = s.dist25 || 0;
+        const serieTotal = serieScores[serieIndex];
+        html += `<td><input type="number" min="0" max="5" value="${dist50}" data-name="${t.name}" data-serie="${serieIndex}" data-field="dist50" style="width:3em;text-align:center"></td>
+                 <td><input type="number" min="0" max="5" value="${dist25}" data-name="${t.name}" data-serie="${serieIndex}" data-field="dist25" style="width:3em;text-align:center"></td>
+                 <td>${serieTotal}</td>`;
+      }
+    });
+
+    html += `<td>${total}</td><td>${perc}%</td>`;
+    tr.innerHTML = html;
+    tbody.appendChild(tr);
+  });
+
+  tbody.querySelectorAll('input[type="number"]').forEach((input) => {
+    input.addEventListener("change", handleScoreInputChange);
+  });
+}
+
+// ==== HISTORIQUE ====
+function saveHistory() {
+  const t = tireurs[currentTireurIndex];
+  if (!t) return;
+  const mode = getMode();
+  const serieText = t.scores.map((s, idx) => {
+    if (mode === "competition") {
+      const cibles = s.cibles || 0;
+      return `S${idx + 1}: ${cibles} cible(s) = ${cibles * 10}`;
+    } else {
+      const pts50 = (s.dist50 || 0) * 10;
+      const pts25 = (s.dist25 || 0) * 10;
+      return `S${idx + 1}: ${pts50}+${pts25}=${pts50 + pts25}`;
+    }
+  }).join(" | ");
+  const totalGlobal = t.scores.map((s) => getSeriePoints(s, mode)).reduce((a, b) => a + b, 0);
+  const div = document.createElement("div");
+  div.innerHTML = `${t.name} — ${serieText} — Total ${totalGlobal} pts <button>Supprimer</button>`;
+  div.querySelector("button").addEventListener("click", () => { div.remove(); });
+  if (historyContainer) historyContainer.appendChild(div);
+}
+
+// ==== EXPORT PDF ====
+function exportPDF() {
+  if (tireurs.length === 0) { showMessage("Aucun tireur à exporter !"); return; }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const mode = getMode();
+  doc.setFontSize(18);
+  doc.text("Résultats du tir", 105, 15, null, null, "center");
+  let headers = [], data = [];
+  if (mode === "competition") {
+    headers = ["#", "Tireur", ...SERIES.map((_, i) => `S${i + 1}`), "Total"];
+    data = tireurs.map((t, idx) => {
+      const seriePts = t.scores.map((s) => (s.cibles || 0) * 10);
+      const total = seriePts.reduce((a, b) => a + b, 0);
+      return [idx + 1, t.name, ...seriePts, total];
+    });
+  } else {
+    headers = ["#", "Tireur", ...SERIES.flatMap((_, i) => [`S${i+1} 50m`, `S${i+1} 25m`, `S${i+1} Total`]), "Total"];
+    data = tireurs.map((t, idx) => {
+      const details = t.scores.flatMap((s) => {
+        const pts50 = (s.dist50 || 0) * 10, pts25 = (s.dist25 || 0) * 10;
+        return [pts50, pts25, pts50 + pts25];
+      });
+      const total = t.scores.map((s) => getSeriePoints(s, mode)).reduce((a, b) => a + b, 0);
+      return [idx + 1, t.name, ...details, total];
+    });
+  }
+  doc.autoTable({ head: [headers], body: data, startY: 25, theme: "grid" });
+  doc.save("resultats-tir.pdf");
+}
+
+// ==== EVENTS ====
+addTireurBtn.addEventListener("click", addTireur);
+tireurNameInput.addEventListener("keydown", (e) => { if (e.key === "Enter") addTireur(); });
+startBtn.addEventListener("click", startTimer);
+resetBtn.addEventListener("click", resetTimerGlobal);
+exportPdfBtn.addEventListener("click", exportPDF);
+
+// ==== SERVICE WORKER ====
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js")
+      .then((reg) => console.log("Service Worker enregistré", reg))
+      .catch((err) => console.log("Erreur Service Worker", err));
+  });
+}
+</script>
+<script>
+// ════════════════════════════════════
+//  PATCHES PROPRES — v8 final
+// ════════════════════════════════════
+
+// ── MODE DATA ──
+const MODE_DATA = {
+  training:{color:"#0a84ff",g2:"#5ac8fa",blocks:[
+    {i:"🎯",t:"50 m + 25 m",d:"5 cibles par distance"},
+    {i:"📐",t:"Scores séparés",d:"50 m et 25 m comptées"},
+    {i:"⏱",t:"30 s de tir",d:"30 secondes par série"},
+    {i:"🔄",t:"4 séries + 1",d:"1 série d'entraînement"}
+  ]},
+  competition:{color:"#ff9f0a",g2:"#ff6b35",blocks:[
+    {i:"🏅",t:"Cibles uniques",d:"Compte global par série"},
+    {i:"🔢",t:"Max 10 cibles",d:"100 pts max par série"},
+    {i:"⏱",t:"20–30 s",d:"Variable selon la série"},
+    {i:"🏆",t:"Classement live",d:"Tri automatique"}
+  ]}
+};
+
+// ── UTILS ──
+function haptic(d){try{navigator.vibrate&&navigator.vibrate(d);}catch(_){}}
+function flashScreen(){var e=document.getElementById("flash");e.classList.remove("go");void e.offsetWidth;e.classList.add("go");}
+function setRing(pct){var r=65,circ=2*Math.PI*r,el=document.querySelector(".ring-fill");if(el)el.style.strokeDashoffset=circ*(1-Math.max(0,Math.min(1,pct/100)));}
+function updateRingUrgency(pct){
+  var ring=document.getElementById("ring-fill-el"),glow=document.getElementById("timer-glow"),td=document.getElementById("timer-display");
+  if(!ring)return;
+  var comp=document.body.classList.contains("competition");
+  if(pct<20){
+    document.getElementById("gStop1").setAttribute("stop-color","#ff453a");
+    document.getElementById("gStop2").setAttribute("stop-color","#ff6b35");
+    ring.classList.add("urgent-ring");
+    if(glow)glow.className="timer-glow urgent";
+    if(td)td.style.color="#ff453a";
+  } else if(pct<50){
+    document.getElementById("gStop1").setAttribute("stop-color","#ffd60a");
+    document.getElementById("gStop2").setAttribute("stop-color","#ff9f0a");
+    ring.classList.remove("urgent-ring");
+    if(glow)glow.className="timer-glow "+(comp?"comp":"train");
+    if(td)td.style.color="#ffd60a";
+  } else {
+    var d=MODE_DATA[comp?"competition":"training"];
+    document.getElementById("gStop1").setAttribute("stop-color",d.color);
+    document.getElementById("gStop2").setAttribute("stop-color",d.g2);
+    ring.classList.remove("urgent-ring");
+    if(glow)glow.className="timer-glow "+(comp?"comp":"train");
+    if(td)td.style.color="";
+  }
+}
+
+// ── SERIES DOTS ──
+function updateSeriesDots(phaseIdx){
+  for(var i=0;i<=4;i++){
+    var dot=document.getElementById("sdot-"+i);if(!dot)continue;
+    var comp=document.body.classList.contains("competition"),cls="sdot";
+    if(typeof PHASES!=="undefined"&&phaseIdx>=0){
+      var firePIdx=-1;
+      PHASES.forEach(function(p,pi){if(p.type==="fire"&&p.serieIndexForScores===i)firePIdx=pi;});
+      if(firePIdx>=0&&firePIdx<phaseIdx)cls+=" done";
+      else if(PHASES[phaseIdx]&&PHASES[phaseIdx].serieIndexForScores===i)cls+=" active-dot "+(comp?"comp":"train");
+    }
+    dot.className=cls;
+  }
+}
+
+// ── PHASE CARD ──
+function updatePhaseCard(phaseIdx){
+  var nameEl=document.getElementById("phase-name-el"),subEl=document.getElementById("phase-sub-el"),
+      iconEl=document.getElementById("phase-icon"),progBar=document.getElementById("phase-prog-bar"),
+      counter=document.getElementById("phase-counter");
+  var comp=document.body.classList.contains("competition"),total=typeof PHASES!=="undefined"?PHASES.length:15;
+  if(phaseIdx<0||typeof PHASES==="undefined"){
+    if(nameEl)nameEl.textContent="En attente";
+    if(subEl)subEl.textContent="Sélectionnez un tireur et démarrez";
+    if(iconEl){iconEl.textContent="⏸";iconEl.className="phase-icon-big pi-idle";}
+    if(progBar)progBar.style.width="0%";
+    if(counter)counter.textContent="—";
+    return;
+  }
+  var phase=PHASES[phaseIdx];
+  var icons={prep:"⏳",ready:"⚠️",fire:"🔥"};
+  var names={prep:"Préparation",ready:"Mise en place",fire:"Tir en cours"};
+  var iconCls={prep:"pi-prep",ready:"pi-ready",fire:"pi-fire"};
+  var serieNames=["Entraînement","Série 1","Série 2","Série 3","Série 4"];
+  if(nameEl)nameEl.textContent=(names[phase.type]||phase.type)+" — "+(serieNames[phase.serieIndexForScores]||"");
+  if(subEl)subEl.textContent=phase.duration+"s • "+(phase.type==="fire"?"Tir actif":phase.type==="ready"?"Installez-vous":"Préparez-vous");
+  if(iconEl){iconEl.textContent=icons[phase.type]||"⏸";iconEl.className="phase-icon-big "+(iconCls[phase.type]||"pi-idle");}
+  if(progBar){progBar.style.width=Math.round((phaseIdx+1)/total*100)+"%";progBar.style.background=comp?"var(--orange)":"var(--blue)";}
+  if(counter)counter.textContent=(phaseIdx+1)+"/"+total;
+  updateSeriesDots(phaseIdx);
+}
+
+// ── TIREUR SWITCHER ──
+function updateTireurSwitcher(){
+  var nameEl=document.getElementById("ts-name"),metaEl=document.getElementById("ts-meta"),
+      prevBtn=document.getElementById("ts-prev"),nextBtn=document.getElementById("ts-next");
+  var comp=document.body.classList.contains("competition"),mode=comp?"competition":"training";
+  if(typeof tireurs==="undefined"||!tireurs.length){
+    if(nameEl)nameEl.innerHTML='<span style="color:var(--label3)">Aucun tireur</span>';
+    if(metaEl)metaEl.textContent="Ajoutez un tireur dans l'onglet 👤";
+    if(prevBtn)prevBtn.disabled=true;if(nextBtn)nextBtn.disabled=true;return;
+  }
+  var idx=(currentTireurIndex!==null&&currentTireurIndex>=0)?currentTireurIndex:0;
+  var t=tireurs[idx];
+  var total=t.scores.map(function(s){return typeof getSeriePoints==="function"?getSeriePoints(s,mode):0;}).reduce(function(a,b){return a+b;},0);
+  var dot='<span class="ts-dot '+(comp?"comp":"train")+'"></span>';
+  if(nameEl)nameEl.innerHTML=dot+t.name;
+  if(metaEl)metaEl.textContent=total+" pts  •  "+(idx+1)+"/"+tireurs.length;
+  var hint=document.getElementById("ts-tap-hint");
+  if(hint)hint.textContent=tireurs.length>1?"Appuyer pour choisir ("+tireurs.length+" tireurs)":"";
+  if(prevBtn)prevBtn.disabled=(idx===0);
+  if(nextBtn)nextBtn.disabled=(idx===tireurs.length-1);
+}
+function switchTireur(dir){
+  if(typeof tireurs==="undefined"||!tireurs.length)return;
+  haptic(10);
+  var newIdx=Math.max(0,Math.min(tireurs.length-1,(currentTireurIndex||0)+dir));
+  currentTireurIndex=newIdx;
+  updateTireurSwitcher();renderSessionScores();renderTireurs();resetTimerGlobal();
+}
+
+// ── SCORE STEPPERS ──
+function adjustScore(name,serieIndex,field,delta,max){
+  var t=tireurs.find(function(t){return t.name===name;});if(!t)return;
+  haptic(8);
+  var val=(t.scores[serieIndex][field]||0)+delta;
+  if(val<0)val=0;if(val>max)val=max;
+  t.scores[serieIndex][field]=val;
+  renderSessionScores();renderTireurs();renderRanking();
+}
+function renderSessionScores(){
+  var wrap=document.getElementById("session-scores-wrap"),card=document.getElementById("session-score-card"),chip=document.getElementById("session-total-chip");
+  if(!wrap||!card)return;
+  var comp=document.body.classList.contains("competition"),mode=comp?"competition":"training";
+  if(typeof tireurs==="undefined"||currentTireurIndex===null||currentTireurIndex<0||currentTireurIndex>=tireurs.length){wrap.style.display="none";return;}
+  wrap.style.display="block";
+  var t=tireurs[currentTireurIndex];
+  var total=t.scores.map(function(s){return typeof getSeriePoints==="function"?getSeriePoints(s,mode):0;}).reduce(function(a,b){return a+b;},0);
+  if(chip){chip.textContent=total+" pts";chip.className="score-total-chip "+(comp?"stc-comp":"stc-train");}
+  var html="";
+  t.scores.forEach(function(s,si){
+    if(comp){
+      var c=s.cibles||0,pts=c*10;
+      html+='<div class="serie-row"><span class="sr-label">S'+(si+1)+'</span><span class="sr-dist">cibles</span><div class="stepper"><button class="stepper-btn" onclick="adjustScore(\''+t.name+'\','+si+',\'cibles\',-1,10)">−</button><span class="stepper-val">'+c+'</span><button class="stepper-btn" onclick="adjustScore(\''+t.name+'\','+si+',\'cibles\',+1,10)">+</button></div><span class="sr-pts">'+pts+' pts</span></div>';
+    } else {
+      var d50=s.dist50||0,d25=s.dist25||0,pts=(d50+d25)*10;
+      html+='<div class="serie-row"><span class="sr-label">S'+(si+1)+'</span><span class="sr-dist">50m</span><div class="stepper"><button class="stepper-btn" onclick="adjustScore(\''+t.name+'\','+si+',\'dist50\',-1,5)">−</button><span class="stepper-val">'+d50+'</span><button class="stepper-btn" onclick="adjustScore(\''+t.name+'\','+si+',\'dist50\',+1,5)">+</button></div><span class="sr-dist" style="margin-left:6px">25m</span><div class="stepper"><button class="stepper-btn" onclick="adjustScore(\''+t.name+'\','+si+',\'dist25\',-1,5)">−</button><span class="stepper-val">'+d25+'</span><button class="stepper-btn" onclick="adjustScore(\''+t.name+'\','+si+',\'dist25\',+1,5)">+</button></div><span class="sr-pts">'+pts+' pts</span></div>';
+    }
+  });
+  card.innerHTML=html;
+}
+
+// ── CLASSEMENT ──
+function renderRanking(){
+  var container=document.getElementById("ranking-container");if(!container)return;
+  var comp=document.body.classList.contains("competition"),mode=comp?"competition":"training";
+  var rows=(typeof tireurs!=="undefined"?tireurs:[]).map(function(t){
+    var spts=t.scores.map(function(s){return typeof getSeriePoints==="function"?getSeriePoints(s,mode):0;});
+    var total=spts.reduce(function(a,b){return a+b;},0);
+    return{t:t,spts:spts,total:total,perc:Math.round(total/400*100)};
+  }).sort(function(a,b){return b.total-a.total;});
+  container.innerHTML="";
+  if(!rows.length){container.innerHTML='<div class="empty-state"><div>📊</div><p>Aucun tireur inscrit</p></div>';return;}
+  rows.forEach(function(row,idx){
+    var mc=idx===0?"medal-1":idx===1?"medal-2":idx===2?"medal-3":"medal-n";
+    var emoji=idx===0?"🥇":idx===1?"🥈":idx===2?"🥉":"#"+(idx+1);
+    var barPct=Math.round(row.total/400*100),barColor=comp?"var(--orange)":"var(--blue)";
+    var chips=row.spts.map(function(p,i){return'<span>S'+(i+1)+': '+p+'</span>';}).join("");
+    var div=document.createElement("div");div.className="rank-card";
+    div.innerHTML='<div class="rank-medal '+mc+'">'+emoji+'</div><div class="rank-info"><div class="rank-name">'+row.t.name+'</div><div class="rank-series">'+chips+'</div><div class="rank-bar-wrap"><div class="rank-bar" style="width:'+barPct+'%;background:'+barColor+'"></div></div></div><div class="rank-total"><div class="rank-pts">'+row.total+'</div><div class="rank-pct">'+row.perc+'%</div></div>';
+    container.appendChild(div);
+  });
+  if(typeof renderScoreTable==="function")renderScoreTable();
+}
+
+// ── TIREURS LIST ──
+window.renderTireurs=function(){
+  var ul=document.getElementById("tireurs-ul");ul.innerHTML="";
+  var comp=document.body.classList.contains("competition"),mode=comp?"competition":"training";
+  if(!tireurs.length){ul.innerHTML='<li style="justify-content:center;color:var(--label2);font-size:.85rem;pointer-events:none;border-bottom:none;padding:16px">Aucun tireur inscrit</li>';return;}
+  tireurs.forEach(function(t,idx){
+    var li=document.createElement("li");
+    var on=idx===currentTireurIndex;
+    var total=t.scores.map(function(s){return typeof getSeriePoints==="function"?getSeriePoints(s,mode):0;}).reduce(function(a,b){return a+b;},0);
+    li.className=on?"active "+(comp?"c":"t"):"";
+    li.innerHTML='<div class="t-av '+(on?"on "+(comp?"comp":"train"):"")+'" >'+t.name.charAt(0).toUpperCase()+'</div><div class="t-info"><div class="t-name">'+t.name+'</div>'+(on?'<div class="'+(comp?"t-status-comp":"t-status-train")+'">● Tireur sélectionné</div>':'<div class="t-pts">'+total+' pts</div>')+'</div><button class="t-del">✕</button>';
+    li.addEventListener("click",function(e){if(e.target.classList.contains("t-del"))return;haptic(10);currentTireurIndex=idx;renderTireurs();resetTimerGlobal();updateTireurSwitcher();renderSessionScores();});
+    li.querySelector(".t-del").addEventListener("click",function(e){e.stopPropagation();haptic([10,5,10]);tireurs.splice(idx,1);if(currentTireurIndex>=tireurs.length)currentTireurIndex=tireurs.length-1;renderTireurs();renderRanking();resetTimerGlobal();updateTireurSwitcher();renderSessionScores();});
+    ul.appendChild(li);
+  });
+  updateTireurSwitcher();
+};
+
+// ── MODE ──
+function setMode(mode){
+  var comp=mode==="competition";
+  document.getElementById("mode-selector").value=mode;
+  document.body.classList.toggle("competition",comp);
+  var d=MODE_DATA[mode];
+  var badge=document.getElementById("navbar-badge");
+  badge.textContent=comp?"🏆 Compétition":"🏋️ Entraînement";
+  badge.className="navbar-badge "+(comp?"badge-comp":"badge-train");
+  document.getElementById("hero-label").style.color=d.color;
+  document.getElementById("hero-bg").className="hero "+(comp?"comp":"train");
+  document.getElementById("toggle-pill").classList.toggle("right",comp);
+  document.getElementById("btn-training").classList.toggle("active",!comp);
+  document.getElementById("btn-competition").classList.toggle("active",comp);
+  document.getElementById("mode-info-grid").innerHTML=d.blocks.map(function(b){return'<div class="mig-item"><div class="mig-icon">'+b.i+'</div><div class="mig-title">'+b.t+'</div><div class="mig-desc">'+b.d+'</div></div>';}).join("");
+  var cta=document.getElementById("cta-start");if(cta)cta.className="cta-btn "+(comp?"cta-comp":"cta-train");
+  document.getElementById("gStop1").setAttribute("stop-color",d.color);
+  document.getElementById("gStop2").setAttribute("stop-color",d.g2);
+  var glow=document.getElementById("timer-glow");if(glow)glow.className="timer-glow "+(comp?"comp":"train");
+  var sb=document.getElementById("start-btn");if(sb)sb.className="ibtn "+(comp?"ibtn-comp":"ibtn-train");
+  var tc=document.getElementById("session-total-chip");if(tc)tc.className="score-total-chip "+(comp?"stc-comp":"stc-train");
+  var ab=document.getElementById("add-tireur-btn");if(ab)ab.className="ios-add-btn "+(comp?"ios-add-comp":"ios-add-train");
+  var pt=document.getElementById("pill-train"),pc=document.getElementById("pill-comp");
+  if(pt&&pc){pt.className="mpill "+(!comp?"active t":"t");pc.className="mpill "+(comp?"active c":"c");}
+  var eb=document.getElementById("export-pdf-btn");if(eb)eb.className="export-btn "+(comp?"comp":"train");
+  document.querySelectorAll(".tab").forEach(function(t){t.classList.toggle("t-train",!comp);t.classList.toggle("t-comp",comp);});
+  updateSeriesDots(-1);renderSessionScores();renderTireurs();renderRanking();
+}
+
+// ── NAV ──
+var PAGE_ORDER=["page-home","page-session","page-tireurs","page-scores","page-history"];
+function switchTab(pageId){
+  document.querySelectorAll(".page").forEach(function(p){p.classList.remove("active");});
+  document.querySelectorAll(".tab").forEach(function(t){t.classList.remove("active");});
+  document.getElementById(pageId).classList.add("active");
+  var tab=document.querySelector('.tab[data-page="'+pageId+'"]');if(tab)tab.classList.add("active");
+  if(pageId==="page-session"){updateTireurSwitcher();renderSessionScores();}
+  if(pageId==="page-scores")renderRanking();
+}
+document.querySelectorAll(".tab").forEach(function(btn){btn.addEventListener("click",function(){switchTab(btn.dataset.page);});});
+(function(){
+  var sx=0,sy=0,el=document.getElementById("pages-container");
+  el.addEventListener("touchstart",function(e){sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
+  el.addEventListener("touchend",function(e){
+    var dx=e.changedTouches[0].clientX-sx,dy=Math.abs(e.changedTouches[0].clientY-sy);
+    if(Math.abs(dx)<50||dy>60)return;
+    var active=document.querySelector(".page.active"),idx=PAGE_ORDER.indexOf(active?active.id:"");
+    if(dx<0&&idx<PAGE_ORDER.length-1)switchTab(PAGE_ORDER[idx+1]);
+    if(dx>0&&idx>0)switchTab(PAGE_ORDER[idx-1]);
+  },{passive:true});
+})();
+
+// ── OVERRIDES ──
+window.showMessage=function(text){
+  haptic(15);var el=document.getElementById("message");
+  el.textContent=text;el.classList.add("show");
+  clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove("show");},2400);
+};
+window.updateTimerDisplay=function(){var el=document.getElementById("timer-display");if(el)el.textContent=timer;};
+window.updateTimerBar=function(){
+  var phase=PHASES[currentPhaseIndex],pct=phase?(timer/phase.duration)*100:0;
+  setRing(pct);if(phase&&phase.type==="fire")updateRingUrgency(pct);
+};
+window.renderScoreCards=function(){renderRanking();renderSessionScores();};
+
+var _oLaunch=window.launchCurrentPhase;
+window.launchCurrentPhase=function(){
+  var _prev=PHASES&&currentPhaseIndex>=0?PHASES[currentPhaseIndex]:null;
+  _oLaunch&&_oLaunch();
+  var _next=PHASES&&currentPhaseIndex>=0?PHASES[currentPhaseIndex]:null;
+  if(_prev&&_prev.type==="fire"&&_next&&_next.type==="prep"){flashScreen();haptic([30,10,30]);}
+  updatePhaseCard(currentPhaseIndex);updateTireurSwitcher();haptic(20);
+  if(PHASES[currentPhaseIndex]){
+    var comp=document.body.classList.contains("competition"),d=MODE_DATA[comp?"competition":"training"];
+    document.getElementById("gStop1").setAttribute("stop-color",d.color);
+    document.getElementById("gStop2").setAttribute("stop-color",d.g2);
+    var td=document.getElementById("timer-display");if(td)td.style.color="";
+    var ring=document.getElementById("ring-fill-el");if(ring)ring.classList.remove("urgent-ring");
+    var glow=document.getElementById("timer-glow");if(glow)glow.className="timer-glow "+(comp?"comp":"train");
+  }
+};
+var _oReset=window.resetTimerGlobal;
+window.resetTimerGlobal=function(){
+  _oReset&&_oReset();setRing(0);updatePhaseCard(-1);
+  var td=document.getElementById("timer-display");if(td){td.textContent="0";td.style.color="";}
+  var ring=document.getElementById("ring-fill-el");if(ring)ring.classList.remove("urgent-ring");
+  var comp=document.body.classList.contains("competition"),d=MODE_DATA[comp?"competition":"training"];
+  document.getElementById("gStop1").setAttribute("stop-color",d.color);
+  document.getElementById("gStop2").setAttribute("stop-color",d.g2);
+  var glow=document.getElementById("timer-glow");if(glow)glow.className="timer-glow "+(comp?"comp":"train");
+  updateTireurSwitcher();
+};
+
+// ── ADD TIREUR ──
+window.addTireur=function(){
+  var input=document.getElementById("tireur-name"),name=input?input.value.trim():"";
+  if(!name){showMessage("Entrez un nom valide");return;}
+  if(tireurs.some(function(t){return t.name===name;})){showMessage("Tireur déjà existant !");return;}
+  tireurs.push({name:name,scores:SERIES.map(function(){return{dist50:0,dist25:0,cibles:0};})});
+  currentTireurIndex=tireurs.length-1;
+  if(input){input.value="";input.focus();}
+  renderTireurs();renderRanking();renderSessionScores();updateTireurSwitcher();renderScoreTable();resetTimerGlobal();
+  showMessage("✅ "+name+" ajouté !");haptic(15);
+};
+
+// ════════════════════════════════════
+//  HISTORIQUE — Groupes par jour
+// ════════════════════════════════════
+var HIST_KEY="tir821_history_v2";
+function getAllHistory(){try{return JSON.parse(localStorage.getItem(HIST_KEY)||"[]");}catch(_){return[];}}
+function saveAllHistory(items){localStorage.setItem(HIST_KEY,JSON.stringify(items));}
+function genId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function dayLabel(k){
+  var today=new Date(),t=today.toLocaleDateString("fr-FR",{day:"2-digit",month:"2-digit",year:"numeric"}),
+      y=new Date(today-86400000).toLocaleDateString("fr-FR",{day:"2-digit",month:"2-digit",year:"numeric"});
+  if(k===t)return"Aujourd'hui";if(k===y)return"Hier";
+  var parts=k.split("/"),date=new Date(parts[2],parts[1]-1,parts[0]);
+  return date.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
+}
+function renderHistory(){
+  var hc=document.getElementById("history-container");if(!hc)return;
+  var items=getAllHistory();hc.innerHTML="";
+  if(!items.length){hc.innerHTML='<div class="empty-state"><div>📭</div><p>Aucun résultat pour l\'instant</p></div>';return;}
+  var groups={},order=[];
+  items.forEach(function(item){if(!groups[item.day]){groups[item.day]=[];order.push(item.day);}groups[item.day].push(item);});
+  order.sort(function(a,b){function p(s){var x=s.split("/");return new Date(x[2],x[1]-1,x[0]);}return p(b)-p(a);});
+  order.forEach(function(day){
+    var group=groups[day],gDiv=document.createElement("div");gDiv.className="hist-day-group";gDiv.setAttribute("data-day",day);
+    var hdr=document.createElement("div");hdr.className="hist-day-header";
+    hdr.innerHTML='<span class="hist-day-label">📅 '+dayLabel(day)+'</span><button class="hist-day-del" onclick="deleteDay(\''+day+'\')">🗑 Supprimer la journée</button>';
+    gDiv.appendChild(hdr);
+    group.forEach(function(item){gDiv.appendChild(buildHistItem(item));});
+    hc.appendChild(gDiv);
+  });
+}
+function buildHistItem(item){
+  var comp=item.mode==="competition",div=document.createElement("div");
+  div.className="hist-item";div.setAttribute("data-id",item.id);
+  var tag=comp?'<span class="hist-tag tag-comp">🏆</span>':'<span class="hist-tag tag-train">🏋️</span>';
+  var cn=item.customName||item.name||"";
+  div.innerHTML=
+    '<div class="hist-av">'+item.initial+'</div>'+
+    '<div class="hist-body">'+
+      '<div class="hist-header">'+
+        '<span class="hist-custom-name" id="hname-'+item.id+'">'+cn+'</span>'+tag+
+        '<span class="hist-time">'+( item.time||"")+'</span>'+
+      '</div>'+
+      '<div class="hist-edit-row" id="hedit-'+item.id+'">'+
+        '<input class="hist-name-input" id="hinput-'+item.id+'" value="'+cn+'" placeholder="Nom de la série…">'+
+        '<button class="hist-btn hist-btn-save" onclick="saveItemName(\''+item.id+'\')">✓</button>'+
+        '<button class="hist-btn hist-btn-cancel" onclick="cancelEdit(\''+item.id+'\')">✕</button>'+
+      '</div>'+
+      '<div class="hist-detail">'+item.lines+'<br><span class="hist-total">Total : '+item.total+' pts</span></div>'+
+    '</div>'+
+    '<div class="hist-actions">'+
+      '<button class="hist-btn hist-btn-edit" onclick="startEdit(\''+item.id+'\')" title="Renommer">✏️</button>'+
+      '<button class="hist-btn hist-btn-del"  onclick="deleteItem(\''+item.id+'\')" title="Supprimer">🗑</button>'+
+    '</div>';
+  return div;
+}
+function startEdit(id){
+  var row=document.getElementById("hedit-"+id),nameEl=document.getElementById("hname-"+id),
+      input=document.getElementById("hinput-"+id),item=document.querySelector('[data-id="'+id+'"]');
+  if(row)row.classList.add("show");if(nameEl)nameEl.style.display="none";
+  if(item)item.classList.add("editing");if(input){input.focus();input.select();}haptic(10);
+}
+function cancelEdit(id){
+  var row=document.getElementById("hedit-"+id),nameEl=document.getElementById("hname-"+id),
+      item=document.querySelector('[data-id="'+id+'"]');
+  if(row)row.classList.remove("show");if(nameEl)nameEl.style.display="";if(item)item.classList.remove("editing");
+}
+function saveItemName(id){
+  var input=document.getElementById("hinput-"+id),nameEl=document.getElementById("hname-"+id);
+  if(!input)return;var newName=input.value.trim();
+  var items=getAllHistory(),idx=items.findIndex(function(i){return i.id===id;});
+  if(idx>=0){items[idx].customName=newName;saveAllHistory(items);}
+  if(nameEl)nameEl.textContent=newName||(idx>=0?items[idx].name:"");
+  cancelEdit(id);showMessage("✏️ Renommé !");haptic(15);
+}
+function deleteItem(id){haptic([10,5,10]);saveAllHistory(getAllHistory().filter(function(i){return i.id!==id;}));renderHistory();}
+function deleteDay(day){haptic([20,10,20]);saveAllHistory(getAllHistory().filter(function(i){return i.day!==day;}));renderHistory();showMessage("🗑 Journée supprimée");}
+
+window.saveHistory=function(){
+  var t=tireurs[currentTireurIndex];if(!t)return;
+  var mode=getMode(),comp=mode==="competition",now=new Date();
+  var day=now.toLocaleDateString("fr-FR",{day:"2-digit",month:"2-digit",year:"numeric"});
+  var time=now.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
+  var lines=t.scores.map(function(s,i){
+    if(comp){var c=s.cibles||0;return"S"+(i+1)+": "+(c*10)+"pts";}
+    var p50=(s.dist50||0)*10,p25=(s.dist25||0)*10;return"S"+(i+1)+": "+p50+"+"+p25+"="+(p50+p25)+"pts";
+  }).join("  •  ");
+  var total=t.scores.map(function(s){return getSeriePoints(s,mode);}).reduce(function(a,b){return a+b;},0);
+  var item={id:genId(),name:t.name,customName:t.name,initial:t.name.charAt(0).toUpperCase(),mode:mode,lines:lines,total:total,day:day,time:time};
+  var items=getAllHistory();items.push(item);saveAllHistory(items);
+  renderHistory();flashScreen();showMessage("✅ Résultat sauvegardé !");
+};
+
+
+// ── BOTTOM SHEET TIREURS (v2 propre) ──
+var _sheetOpen = false;
+
+function openSheet(){
+  if(typeof tireurs === "undefined" || !tireurs.length){
+    showMessage("Aucun tireur inscrit"); return;
+  }
+  haptic(10);
+  _buildSheetList();
+  document.getElementById("sheet-overlay").classList.add("open");
+  document.getElementById("tireur-sheet").classList.add("open");
+  _sheetOpen = true;
+}
+
+function closeSheet(){
+  document.getElementById("sheet-overlay").classList.remove("open");
+  document.getElementById("tireur-sheet").classList.remove("open");
+  _sheetOpen = false;
+}
+
+function _buildSheetList(){
+  var comp = document.body.classList.contains("competition");
+  var mode = comp ? "competition" : "training";
+  var list = document.getElementById("sheet-list");
+  list.innerHTML = "";
+
+  tireurs.forEach(function(t, idx){
+    var sel = (idx === currentTireurIndex);
+    var spts = t.scores.map(function(s){
+      return typeof getSeriePoints === "function" ? getSeriePoints(s, mode) : 0;
+    });
+    var total = spts.reduce(function(a,b){ return a+b; }, 0);
+    var detail = spts.map(function(p,i){ return "S"+(i+1)+":"+p; }).join("  ");
+
+    var selCls = sel ? (comp ? "sel-c" : "sel-t") : "";
+    var item = document.createElement("div");
+    item.className = "s-item " + selCls;
+    item.setAttribute("data-idx", String(idx));
+
+    item.innerHTML =
+      '<div class="s-av '+selCls+'">'+t.name.charAt(0).toUpperCase()+'</div>'+
+      '<div class="s-info">'+
+        '<div class="s-name">'+t.name+'</div>'+
+        '<div class="s-pts">'+total+' pts &nbsp;·&nbsp; '+detail+'</div>'+
+      '</div>'+
+      '<div class="s-check'+(sel?" vis":"")+'">✓</div>';
+
+    list.appendChild(item);
+    if(sel) setTimeout(function(){ item.scrollIntoView({block:"nearest",behavior:"smooth"}); }, 80);
+  });
+
+  list.onclick = function(e){
+    var item = e.target.closest(".s-item");
+    if(!item) return;
+    var idx = parseInt(item.getAttribute("data-idx"), 10);
+    if(isNaN(idx)) return;
+    haptic(15);
+    currentTireurIndex = idx;
+    closeSheet();
+    updateTireurSwitcher();
+    renderSessionScores();
+    renderTireurs();
+  };
+}
+
+document.addEventListener("keydown", function(e){
+  if(e.key === "Escape" && _sheetOpen) closeSheet();
+});
+
+// ── INIT ──
+window.addEventListener("load",function(){setTimeout(function(){document.getElementById("splash").classList.add("hide");},1100);});
+document.addEventListener("DOMContentLoaded",function(){
+  setMode("training");setRing(0);updatePhaseCard(-1);updateTireurSwitcher();
+  renderSessionScores();renderRanking();renderHistory();
+});
+</script>
+
+</body>
+</html>
