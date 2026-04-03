@@ -1,19 +1,29 @@
 {
-  "name": "Tir Gong",
+  "name": "Tir",
   "short_name": "Tir",
   "description": "Gestion de tir au gong",
   "start_url": "/Tar/",
   "scope": "/Tar/",
   "display": "standalone",
-  "orientation": "portrait",
+  "orientation": "portrait-primary",
   "background_color": "#000000",
   "theme_color": "#0a84ff",
+  "categories": [
+    "sports"
+  ],
   "lang": "fr",
   "icons": [
     {
-      "src": "/Tar/icons/icon-48.png",
-      "sizes": "48x48",
-      "type": "image/png"
+      "src": "/Tar/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/Tar/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "/Tar/icons/icon-72.png",
@@ -36,12 +46,6 @@
       "type": "image/png"
     },
     {
-      "src": "/Tar/icons/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
       "src": "/Tar/icons/icon-256.png",
       "sizes": "256x256",
       "type": "image/png"
@@ -49,13 +53,8 @@
     {
       "src": "/Tar/icons/icon-384.png",
       "sizes": "384x384",
-      "type": "image/png"
-    },
-    {
-      "src": "/Tar/icons/icon-512.png",
-      "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "maskable"
     }
   ]
 }
