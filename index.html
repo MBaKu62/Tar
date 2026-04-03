@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Tir Gong 821</title>
+  <title>Tir Gong</title>
   <link rel="manifest" href="./manifest.json">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -381,11 +381,77 @@
     .s-check.vis{opacity:1}
     body.competition .s-check.vis{color:#ff9f0a}
     .ts-tap-hint{font-size:.62rem;color:rgba(255,255,255,.3);margin-top:2px;letter-spacing:.02em}
+
+
+    /* ══ DISCIPLINE TRIGGER ══ */
+    .disc-trigger{display:flex;align-items:center;gap:13px;background:var(--bg2);
+      border-radius:14px;padding:13px 16px;cursor:pointer;transition:background .15s;
+      border:1.5px solid var(--sep)}
+    .disc-trigger:active{background:var(--bg3)}
+    .disc-trigger-icon{width:36px;height:36px;border-radius:10px;flex-shrink:0;
+      display:flex;align-items:center;justify-content:center;font-size:1.1rem;
+      transition:background .3s}
+    .dti-train{background:rgba(10,132,255,.18)}.dti-comp{background:rgba(255,159,10,.18)}
+    .disc-trigger-body{flex:1}
+    .dtt-label{font-size:.68rem;font-weight:600;text-transform:uppercase;
+      letter-spacing:.09em;color:var(--label2)}
+    .dtt-value{font-size:.92rem;font-weight:800;margin-top:2px;transition:color .3s}
+    .dtv-train{color:var(--blue)}.dtv-comp{color:var(--orange)}
+    .disc-trigger-arrow{font-size:1.3rem;color:var(--label3)}
+
+    /* ══ DISC SHEET items ══ */
+    .ds-item{display:flex;align-items:center;gap:13px;padding:13px 14px;
+      border-radius:13px;cursor:pointer;margin-bottom:5px;transition:background .15s}
+    .ds-item:active{background:var(--bg3)}
+    .ds-item.ds-active.train{background:rgba(10,132,255,.12)}
+    .ds-item.ds-active.comp {background:rgba(255,159,10,.10)}
+    .ds-item.ds-locked{opacity:.38;cursor:not-allowed}
+    .ds-item.ds-locked:active{background:transparent}
+    .ds-icon{width:40px;height:40px;min-width:40px;border-radius:11px;flex-shrink:0;
+      display:flex;align-items:center;justify-content:center;font-size:1.15rem;
+      background:var(--bg3)}
+    .ds-icon.sel-t{background:rgba(10,132,255,.22)}.ds-icon.sel-c{background:rgba(255,159,10,.18)}
+    .ds-info{flex:1}
+    .ds-name{font-size:.9rem;font-weight:700}
+    .ds-desc{font-size:.7rem;color:var(--label2);margin-top:2px}
+    .ds-right{flex-shrink:0;text-align:right}
+    .ds-check{font-size:.95rem;color:var(--blue);opacity:0}
+    body.competition .ds-check{color:var(--orange)}
+    .ds-item.ds-active .ds-check{opacity:1}
+    .ds-soon{font-size:.6rem;font-weight:700;padding:2px 7px;border-radius:99px;
+      background:var(--bg4);color:var(--label3)}
+
+    /* ══ PDF SELECTION MODE ══ */
+    .hist-select-bar{display:flex;align-items:center;justify-content:space-between;
+      padding:0 0 10px;gap:8px}
+    .sel-toggle-btn{background:var(--bg2);border:1px solid var(--sep);border-radius:10px;
+      padding:8px 14px;font-size:.78rem;font-weight:700;font-family:inherit;
+      color:var(--label2);cursor:pointer;transition:all .2s}
+    .sel-toggle-btn.active.train{background:rgba(10,132,255,.15);color:var(--blue);border-color:rgba(10,132,255,.3)}
+    .sel-toggle-btn.active.comp {background:rgba(255,159,10,.12);color:var(--orange);border-color:rgba(255,159,10,.3)}
+    .sel-count{font-size:.78rem;font-weight:700;color:var(--label2)}
+    /* Checkbox visuel */
+    .hist-cb{width:22px;height:22px;min-width:22px;border-radius:50%;border:2px solid var(--bg4);
+      display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;
+      font-size:.7rem;color:#fff;display:none}
+    .select-mode .hist-cb{display:flex}
+    .hist-cb.checked.train{background:var(--blue);border-color:var(--blue)}
+    .hist-cb.checked.comp {background:var(--orange);border-color:var(--orange)}
+    .day-cb{display:none;width:22px;height:22px;border-radius:50%;border:2px solid var(--bg4);
+      align-items:center;justify-content:center;font-size:.7rem;color:#fff;
+      cursor:pointer;transition:all .2s;flex-shrink:0}
+    .select-mode .day-cb{display:flex}
+    .day-cb.checked.train{background:var(--blue);border-color:var(--blue)}
+    .day-cb.checked.comp {background:var(--orange);border-color:var(--orange)}
+
+
+
+    .tab[data-page="page-session"].disabled-tab{opacity:.38;pointer-events:none}
   </style>
 </head>
 <body>
 
-<div id="splash"><div class="splash-icon">🎯</div><div class="splash-title">Tir Gong 821</div><div class="splash-sub">Gestion de compétition</div></div>
+<div id="splash"><div class="splash-icon">🎯</div><div class="splash-title">Tir Gong</div><div class="splash-sub">Gestion de compétition</div></div>
 <div id="flash"></div>
 
 <!-- BOTTOM SHEET TIREURS -->
@@ -401,7 +467,7 @@
 
 
 <div class="navbar">
-  <div class="navbar-title">Tir Gong <span style="opacity:.45">821</span></div>
+  <div class="navbar-title">Tir Gong <span style="opacity:.45"></span></div>
   <div class="navbar-badge badge-train" id="navbar-badge">🏋️ Entraînement</div>
 </div>
 <select id="mode-selector"><option value="training">Entraînement</option><option value="competition">Compétition</option></select>
@@ -412,9 +478,21 @@
   <!-- ACCUEIL -->
   <div class="page active" id="page-home">
     <div class="hero train" id="hero-bg">
-      <h1>Gestion tir<br><span id="hero-label" style="color:var(--blue);transition:color .3s">Gong 821</span></h1>
+      <h1>Gestion tir<br><span id="hero-label" style="color:var(--blue);transition:color .3s">Gong</span></h1>
       <p>Gérez vos tireurs, lancez les séries et consultez le classement en direct.</p>
     </div>
+      <!-- DISCIPLINE TRIGGER -->
+      <div style="margin:0 16px 4px">
+        <div class="slabel">Discipline de tir</div>
+        <div class="disc-trigger" onclick="openDisciplineSheet()">
+          <div class="disc-trigger-icon dti-train" id="dti"></div>
+          <div class="disc-trigger-body">
+            <div class="dtt-label">Discipline active</div>
+            <div class="dtt-value dtv-train" id="disc-trigger-value">821</div>
+          </div>
+          <div class="disc-trigger-arrow">›</div>
+        </div>
+      </div>
     <div class="mode-card">
       <div class="mode-card-title">Mode de jeu</div>
       <div class="mode-toggle">
@@ -425,7 +503,7 @@
       <div class="mode-info-grid" id="mode-info-grid"></div>
     </div>
     <div style="margin:0 16px 4px">
-      <div class="slabel">Règles 821</div>
+      <div class="slabel">Règles</div>
       <div class="ios-group">
         <div class="ios-row"><div class="row-icon ri-blue">📋</div><div class="row-body"><div class="row-title">4 séries par tireur</div><div class="row-sub">Chaque tireur effectue 4 séries de tir</div></div></div>
         <div class="ios-row"><div class="row-icon ri-orange">🎯</div><div class="row-body"><div class="row-title">Cibles par série</div><div class="row-sub">Jusqu'à 5 cibles à 50 m + 5 cibles à 25 m</div></div></div>
@@ -547,11 +625,16 @@
   <!-- HISTORIQUE -->
   <div class="page" id="page-history">
     <div class="hist-wrap">
-      <div class="slabel">Résultats enregistrés</div>
+      <div class="hist-select-bar">
+        <div class="slabel" style="padding:0;margin:0">Résultats enregistrés</div>
+        <button class="sel-toggle-btn" id="sel-toggle-btn" onclick="toggleSelectMode()">☑ Sélectionner</button>
+      </div>
+      <button id="export-inline-btn" onclick="exportSelectedPDF()" style="display:none;align-items:center;justify-content:center;gap:8px;border:none;border-radius:14px;padding:13px;font-size:.88rem;font-weight:700;font-family:inherit;width:100%;cursor:pointer;color:#fff;background:var(--blue);margin-bottom:10px;transition:opacity .15s">
+      </button>
       <div id="history-container"><div class="empty-state"><div>📭</div><p>Aucun résultat pour l'instant</p></div></div>
-      <button class="export-btn train" id="export-pdf-btn">⬇ Exporter en PDF</button>
     </div>
   </div>
+
 </div>
 
 <nav class="tabbar">
@@ -1261,11 +1344,20 @@ function setMode(mode){
   var eb=document.getElementById("export-pdf-btn");if(eb)eb.className="export-btn "+(comp?"comp":"train");
   document.querySelectorAll(".tab").forEach(function(t){t.classList.toggle("t-train",!comp);t.classList.toggle("t-comp",comp);});
   updateSeriesDots(-1);renderSessionScores();renderTireurs();renderRanking();
+  updateDiscTrigger();
 }
 
 // ── NAV ──
 var PAGE_ORDER=["page-home","page-session","page-tireurs","page-scores","page-history"];
 function switchTab(pageId){
+  // Bloquer Session sans discipline sélectionnée
+  if(pageId === "page-session" && !currentDiscipline){
+    showMessage("⚠️ Sélectionne une discipline d'abord");
+    haptic([10,5,10]);
+    // Ouvrir directement le sheet discipline
+    openDisciplineSheet();
+    return;
+  }
   document.querySelectorAll(".page").forEach(function(p){p.classList.remove("active");});
   document.querySelectorAll(".tab").forEach(function(t){t.classList.remove("active");});
   document.getElementById(pageId).classList.add("active");
@@ -1273,6 +1365,7 @@ function switchTab(pageId){
   if(pageId==="page-session"){updateTireurSwitcher();renderSessionScores();}
   if(pageId==="page-scores")renderRanking();
 }
+
 document.querySelectorAll(".tab").forEach(function(btn){btn.addEventListener("click",function(){switchTab(btn.dataset.page);});});
 (function(){
   var sx=0,sy=0,el=document.getElementById("pages-container");
@@ -1501,13 +1594,426 @@ document.addEventListener("keydown", function(e){
   if(e.key === "Escape" && _sheetOpen) closeSheet();
 });
 
+
+// ════════════════════════════════════
+//  DISCIPLINES — Bottom Sheet
+// ════════════════════════════════════
+var DISCIPLINES = [
+  {
+    id:"821", desc:"", available:true,
+    svg:'<svg viewBox="0 0 40 40" width="22" height="22"><circle cx="20" cy="20" r="17" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="20" cy="20" r="11" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="20" cy="20" r="5" fill="currentColor"/><line x1="20" y1="3" x2="20" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="20" y1="28" x2="20" y2="37" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="3" y1="20" x2="12" y2="20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="28" y1="20" x2="37" y2="20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
+  },
+  {
+    id:"soon1", desc:"", available:false,
+    svg:'<svg viewBox="0 0 40 40" width="22" height="22"><circle cx="20" cy="20" r="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-dasharray="4 3"/><circle cx="20" cy="20" r="9" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="3 3"/><circle cx="20" cy="20" r="3" fill="currentColor"/></svg>'
+  },
+  {
+    id:"soon2", desc:"", available:false,
+    svg:'<svg viewBox="0 0 40 40" width="22" height="22"><circle cx="20" cy="20" r="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-dasharray="4 3"/><circle cx="20" cy="20" r="9" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="3 3"/><circle cx="20" cy="20" r="3" fill="currentColor"/></svg>'
+  },
+  {
+    id:"soon3", desc:"", available:false,
+    svg:'<svg viewBox="0 0 40 40" width="22" height="22"><circle cx="20" cy="20" r="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-dasharray="4 3"/><circle cx="20" cy="20" r="9" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="3 3"/><circle cx="20" cy="20" r="3" fill="currentColor"/></svg>'
+  }
+];
+
+var currentDiscipline = null;
+
+function openDisciplineSheet(){
+  haptic(10);
+  var comp = document.body.classList.contains("competition");
+  var mc = comp ? "comp" : "train";
+  var list = document.getElementById("disc-sheet-list");
+  list.innerHTML = "";
+  DISCIPLINES.forEach(function(d){
+    var sel = d.id === currentDiscipline;
+    var item = document.createElement("div");
+    item.className = "ds-item" + (sel?" ds-active "+mc:"") + (!d.available?" ds-locked":"");
+    item.setAttribute("data-id", d.id);
+    item.innerHTML =
+      '<div class="ds-icon'+(sel?" sel-"+mc[0]+"":"")+" style=\"color:"+(sel?(comp?"#ff9f0a":"#0a84ff"):"rgba(180,180,200,.55)")+"\">"+d.svg+'</div>'+
+      '<div class="ds-info">'+
+        '<div class="ds-name">'+(d.available?d.id:"Bientôt")+'</div>'+
+        (d.available&&d.desc?'<div class="ds-desc">'+d.desc+'</div>':"")+
+      '</div>'+
+      '<div class="ds-right">'+
+        (sel?'<div class="ds-check">✓</div>':"")+ 
+        (!d.available?'<div class="ds-soon">🔒</div>':"")+
+      '</div>';
+    list.appendChild(item);
+  });
+  list.onclick = function(e){
+    var item = e.target.closest(".ds-item");
+    if(!item||item.classList.contains("ds-locked")){
+      if(item) showMessage("🔒 Bientôt disponible"); return;
+    }
+    currentDiscipline = item.getAttribute("data-id");
+    closeDisciplineSheet();
+    updateDiscTrigger();
+    haptic(15);
+    showMessage("✅ " + currentDiscipline + " sélectionné");
+  };
+  document.getElementById("disc-sheet-overlay").classList.add("open");
+  document.getElementById("disc-sheet").classList.add("open");
+}
+function closeDisciplineSheet(){
+  document.getElementById("disc-sheet-overlay").classList.remove("open");
+  document.getElementById("disc-sheet").classList.remove("open");
+}
+function updateDiscTrigger(){
+  var comp = document.body.classList.contains("competition");
+  var d = currentDiscipline ? DISCIPLINES.find(function(x){return x.id===currentDiscipline;}) : null;
+  var icon = document.getElementById("dti");
+  var val  = document.getElementById("disc-trigger-value");
+  var neutralSvg = '<svg viewBox="0 0 40 40" width="20" height="20"><circle cx="20" cy="20" r="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-dasharray="5 3"/><circle cx="20" cy="20" r="8" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="4 3"/><circle cx="20" cy="20" r="3" fill="currentColor" opacity=".4"/></svg>';
+  if(icon){
+    icon.innerHTML = d ? d.svg : neutralSvg;
+    icon.className = "disc-trigger-icon" + (d ? " "+(comp?"dti-comp":"dti-train") : " dti-none");
+    icon.style.color = d ? (comp?"#ff9f0a":"#0a84ff") : "rgba(160,160,175,.5)";
+  }
+  if(val){
+    val.textContent = d && d.available ? d.id : "Sélectionner…";
+    val.style.color = d ? (comp?"#ff9f0a":"#0a84ff") : "rgba(160,160,175,.55)";
+    val.className = "dtt-value";
+  }
+  // Verrouiller/déverrouiller l'onglet Session
+  var tabSession = document.querySelector(".tab[data-page='page-session']");
+  if(tabSession){
+    tabSession.style.opacity = d ? "1" : "0.38";
+  }
+}
+
+
+// ════════════════════════════════════
+//  HISTORIQUE — Sélection + PDF
+// ════════════════════════════════════
+var _selectMode = false;
+var _selectedIds = {};
+
+function toggleSelectMode(){
+  _selectMode = !_selectMode;
+  _selectedIds = {};
+  var btn = document.getElementById("sel-toggle-btn");
+  var comp = document.body.classList.contains("competition");
+  var mc = comp?"comp":"train";
+  if(btn){
+    btn.textContent = _selectMode ? "✕ Annuler" : "☑ Sélectionner";
+    btn.className = "sel-toggle-btn" + (_selectMode?" active "+mc:"");
+  }
+  document.getElementById("history-container").classList.toggle("select-mode", _selectMode);
+  updateFAB();
+  renderHistory();
+}
+
+function toggleItemSelect(id){
+  if(_selectedIds[id]) delete _selectedIds[id];
+  else _selectedIds[id] = true;
+  updateFAB();
+  // Mettre à jour visuellement seulement la checkbox
+  var cb = document.getElementById("cb-"+id);
+  var comp = document.body.classList.contains("competition");
+  if(cb) cb.className = "hist-cb" + (_selectedIds[id]?" checked "+(comp?"comp":"train"):"");
+}
+
+function toggleDaySelect(day){
+  var comp = document.body.classList.contains("competition");
+  var items = getAllHistory().filter(function(i){return i.day===day;});
+  var allSel = items.every(function(i){return _selectedIds[i.id];});
+  items.forEach(function(i){
+    if(allSel) delete _selectedIds[i.id];
+    else _selectedIds[i.id] = true;
+    var cb = document.getElementById("cb-"+i.id);
+    if(cb) cb.className = "hist-cb" + (_selectedIds[i.id]?" checked "+(comp?"comp":"train"):"");
+  });
+  var dayCb = document.getElementById("daycb-"+day.replace(/\//g,"-"));
+  if(dayCb){
+    var nowAll = items.every(function(i){return _selectedIds[i.id];});
+    dayCb.className = "day-cb" + (nowAll?" checked "+(comp?"comp":"train"):"");
+    dayCb.textContent = nowAll ? "✓" : "";
+  }
+  updateFAB();
+}
+
+function updateFAB(){
+  var n = Object.keys(_selectedIds).length;
+  var btn = document.getElementById("export-inline-btn");
+  if(btn){ 
+    btn.style.display = (_selectMode && n > 0) ? "flex" : "none";
+    btn.textContent = "⬇ Exporter PDF (" + n + ")";
+  }
+}
+
+
+// ── renderHistory modifiée pour intégrer les cases ──
+function renderHistory(){
+  var hc = document.getElementById("history-container");
+  if(!hc) return;
+  if(_selectMode) hc.classList.add("select-mode");
+  else hc.classList.remove("select-mode");
+  var items = getAllHistory();
+  hc.innerHTML = "";
+  if(!items.length){
+    hc.innerHTML='<div class="empty-state"><div>📭</div><p>Aucun résultat pour l\'instant</p></div>';
+    return;
+  }
+  var groups={}, order=[];
+  items.forEach(function(item){if(!groups[item.day]){groups[item.day]=[];order.push(item.day);}groups[item.day].push(item);});
+  order.sort(function(a,b){function p(s){var x=s.split("/");return new Date(x[2],x[1]-1,x[0]);}return p(b)-p(a);});
+  order.forEach(function(day){
+    var group=groups[day];
+    var gDiv=document.createElement("div");
+    gDiv.className="hist-day-group";
+    gDiv.setAttribute("data-day",day);
+    var dayKey = day.replace(/\//g,"-");
+    var comp = document.body.classList.contains("competition");
+    var mc = comp?"comp":"train";
+    var allSel = _selectMode && group.every(function(i){return _selectedIds[i.id];});
+    var dayCbHtml = '<div class="day-cb'+(allSel?" checked "+mc:"")+'" id="daycb-'+dayKey+'" onclick="toggleDaySelect(\''+day+'\')">'+( allSel?"✓":"")+'</div>';
+    var hdr=document.createElement("div");
+    hdr.className="hist-day-header";
+    hdr.innerHTML=
+      dayCbHtml+
+      '<span class="hist-day-label">📅 '+dayLabel(day)+'</span>'+
+      '<button class="hist-day-del" onclick="deleteDay(\''+day+'\')">🗑</button>';
+    gDiv.appendChild(hdr);
+    group.forEach(function(item){gDiv.appendChild(buildHistItem(item));});
+    hc.appendChild(gDiv);
+  });
+}
+
+// ── buildHistItem avec checkbox ──
+function buildHistItem(item){
+  var comp=item.mode==="competition",div=document.createElement("div");
+  div.className="hist-item";div.setAttribute("data-id",item.id);
+  var tag=comp?'<span class="hist-tag tag-comp">🏆</span>':'<span class="hist-tag tag-train">🏋️</span>';
+  var cn=item.customName||item.name||"";
+  var mc = comp?"comp":"train";
+  var isSel = !!_selectedIds[item.id];
+  div.innerHTML=
+    '<div class="hist-cb'+(isSel?" checked "+mc:"")+'" id="cb-'+item.id+'" onclick="toggleItemSelect(\''+item.id+'\')"></div>'+
+    '<div class="hist-av">'+item.initial+'</div>'+
+    '<div class="hist-body">'+
+      '<div class="hist-header">'+
+        '<span class="hist-custom-name" id="hname-'+item.id+'">'+cn+'</span>'+tag+
+        '<span class="hist-time">'+(item.time||"")+'</span>'+
+      '</div>'+
+      '<div class="hist-edit-row" id="hedit-'+item.id+'">'+
+        '<input class="hist-name-input" id="hinput-'+item.id+'" value="'+cn+'" placeholder="Nom de la série…">'+
+        '<button class="hist-btn hist-btn-save" onclick="saveItemName(\''+item.id+'\')">✓</button>'+
+        '<button class="hist-btn hist-btn-cancel" onclick="cancelEdit(\''+item.id+'\')">✕</button>'+
+      '</div>'+
+      '<div class="hist-detail">'+item.lines+'<br><span class="hist-total">Total : '+item.total+' pts</span></div>'+
+    '</div>'+
+    '<div class="hist-actions">'+(
+      _selectMode
+        ? '<button class="hist-btn hist-btn-edit" onclick="toggleItemSelect(\''+item.id+'\')">☑</button>'
+        : '<button class="hist-btn hist-btn-edit" onclick="startEdit(\''+item.id+'\')" >✏️</button>'+
+          '<button class="hist-btn hist-btn-del"  onclick="deleteItem(\''+item.id+'\')" >🗑</button>'
+    )+'</div>';
+  // Tap sur l'item en mode select
+  if(_selectMode){
+    div.style.cursor = "pointer";
+    div.addEventListener("click", function(e){
+      if(e.target.classList.contains("hist-btn")) return;
+      toggleItemSelect(item.id);
+    });
+  }
+  return div;
+}
+
+// ── EXPORT PDF ──
+function exportSelectedPDF(){
+  var ids = Object.keys(_selectedIds);
+  if(!ids.length){ showMessage("Aucun résultat sélectionné"); return; }
+  var all = getAllHistory();
+  var selected = all.filter(function(i){ return _selectedIds[i.id]; });
+  if(!selected.length){ showMessage("Aucun résultat trouvé"); return; }
+  _generatePDF(selected);
+}
+
+function _generatePDF(items){
+  var jsPDF = window.jspdf ? window.jspdf.jsPDF : window.jsPDF;
+  if(!jsPDF){ showMessage("jsPDF non chargé"); return; }
+
+  var comp = items.some(function(i){ return i.mode==="competition"; });
+  var mc = comp ? [230,126,34] : [41,128,185]; // orange ou bleu mat
+  var mc2 = comp ? [243,156,18] : [52,152,219];
+
+  var doc = new jsPDF({orientation:"portrait", unit:"mm", format:"a4"});
+  var W=210, M=14, y=0;
+
+  // ══ BANDEAU HEADER ══
+  // Fond couleur pleine hauteur
+  doc.setFillColor(mc[0], mc[1], mc[2]);
+  doc.rect(0, 0, W, 32, "F");
+  // Titre principal
+  doc.setTextColor(255,255,255);
+  doc.setFont("helvetica","bold"); doc.setFontSize(20);
+  doc.text("Tir Gong", M, 14);
+  // Sous-titre mode
+  doc.setFont("helvetica","normal"); doc.setFontSize(9);
+  doc.setTextColor(255,255,255); doc.text(comp ? "Compétition" : "Entraînement", M, 20);
+  // Date export
+  var now = new Date();
+  var dateStr = now.toLocaleDateString("fr-FR",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+  doc.setFontSize(8); doc.setTextColor(230,230,255);
+  doc.text(dateStr + "  " + now.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}), M, 27);
+  // Nb résultats (coin droit)
+  doc.setFont("helvetica","bold"); doc.setFontSize(22);
+  doc.setTextColor(255,255,255);
+  var nStr = String(items.length);
+  doc.text(nStr, W-M-doc.getTextWidth(nStr)-14, 18);
+  doc.setFont("helvetica","normal"); doc.setFontSize(7);
+  doc.text("résultat(s)", W-M-28, 24);
+  y = 38;
+
+  // Grouper par jour
+  var groups={}, order=[];
+  items.forEach(function(it){
+    if(!groups[it.day]){groups[it.day]=[];order.push(it.day);}
+    groups[it.day].push(it);
+  });
+  order.sort(function(a,b){
+    function p(s){var x=s.split("/");return new Date(x[2],x[1]-1,x[0]);}
+    return p(a)-p(b);
+  });
+
+  order.forEach(function(day, di){
+    if(di > 0) y += 4;
+
+    // ── En-tête de jour ──
+    doc.setFillColor(mc2[0], mc2[1], mc2[2]);
+    doc.roundedRect(M, y, W-M*2, 9, 1.5, 1.5, "F");
+    doc.setTextColor(255,255,255);
+    doc.setFont("helvetica","bold"); doc.setFontSize(9.5);
+    var dayStr = dayLabel(day).toUpperCase();
+    doc.text(dayStr, M+4, y+6.2);
+    // Nb tireurs ce jour
+    var grp = groups[day];
+    grp.sort(function(a,b){ return b.total - a.total; });
+    doc.setFont("helvetica","normal"); doc.setFontSize(8);
+    doc.setTextColor(240,240,255);
+    doc.text(grp.length+" tireur(s)", W-M-26, y+6.2);
+    y += 13;
+
+    // ── En-tête colonnes ──
+    var cols  = ["Rang","Tireur","S1","S2","S3","S4","Total"];
+    var cw    = [14, 62, 18, 18, 18, 18, 22];
+    var cx    = [M];
+    cw.forEach(function(w,i){ cx.push(cx[i]+w); });
+
+    // Ligne de séparation
+    doc.setDrawColor(mc[0],mc[1],mc[2]);
+    doc.setLineWidth(0.4);
+    doc.line(M, y, W-M, y);
+    y += 1;
+    doc.setFillColor(245, 247, 250);
+    doc.rect(M, y, W-M*2, 7, "F");
+    doc.setTextColor(80,90,110); doc.setFont("helvetica","bold"); doc.setFontSize(7.5);
+    cols.forEach(function(c,i){ doc.text(c, cx[i]+1.5, y+5); });
+    y += 8;
+
+    // ── Lignes tireurs ──
+    grp.forEach(function(item, idx){
+      if(y > 270){ doc.addPage(); y = 16; }
+
+      var rank = idx+1;
+      var isPodium = rank <= 3;
+
+      // Fond podium ou alterné
+      if(isPodium){
+        var podClr = rank===1?[255,248,220]:rank===2?[240,248,255]:[255,245,235];
+        doc.setFillColor(podClr[0],podClr[1],podClr[2]);
+        doc.roundedRect(M, y, W-M*2, 8.5, 1, 1, "F");
+        // Bordure gauche colorée
+        var bClr = rank===1?[212,175,55]:rank===2?[160,174,192]:rank===3?[176,124,73]:mc;
+        doc.setFillColor(bClr[0],bClr[1],bClr[2]);
+        doc.rect(M, y, 2.5, 8.5, "F");
+      } else if(idx%2===0){
+        doc.setFillColor(251,252,254);
+        doc.rect(M, y, W-M*2, 8.5, "F");
+      }
+
+      // Rang
+      var rankLabel = rank===1?"1er":rank===2?"2e":rank===3?"3e":rank+"e";
+      var rankClr = rank===1?[184,134,11]:rank===2?[100,116,139]:rank===3?[146,86,50]:[120,130,145];
+      doc.setTextColor(rankClr[0],rankClr[1],rankClr[2]);
+      doc.setFont("helvetica","bold"); doc.setFontSize(isPodium?9:8);
+      doc.text(rankLabel, cx[0]+1.5, y+6);
+
+      // Nom
+      doc.setTextColor(30,40,55); doc.setFont("helvetica", isPodium?"bold":"normal"); doc.setFontSize(8.5);
+      var nom = (item.customName||item.name||"").substring(0,22);
+      doc.text(nom, cx[1]+2, y+6);
+
+      // Scores séries
+      var spts = [];
+      try {
+        var parts = item.lines.split(/[\s·•]+/);
+        var nums = parts.filter(function(p){ return /^\d+$/.test(p); });
+        spts = [nums[0]||"0", nums[1]||"0", nums[2]||"0", nums[3]||"0"];
+      } catch(e){ spts=["0","0","0","0"]; }
+
+      doc.setTextColor(80,95,115); doc.setFont("helvetica","normal"); doc.setFontSize(8);
+      spts.forEach(function(p,i){ doc.text(p, cx[i+2]+1.5, y+6); });
+
+      // Total
+      doc.setFont("helvetica","bold"); doc.setFontSize(9);
+      doc.setTextColor(mc[0],mc[1],mc[2]);
+      doc.text(String(item.total), cx[6]+1.5, y+6);
+
+      // Heure (droite)
+      if(item.time){
+        doc.setFont("helvetica","normal"); doc.setFontSize(6.5);
+        doc.setTextColor(170,175,185);
+        doc.text(item.time, W-M-2, y+6, {align:"right"});
+      }
+
+      y += 9;
+    });
+
+    // Ligne de clôture du jour
+    doc.setDrawColor(220,225,235); doc.setLineWidth(0.3);
+    doc.line(M, y, W-M, y);
+    y += 6;
+  });
+
+  // ══ FOOTER ══
+  var pageCount = doc.getNumberOfPages();
+  for(var i=1; i<=pageCount; i++){
+    doc.setPage(i);
+    doc.setFillColor(mc[0],mc[1],mc[2]);
+    doc.rect(0, 291, W, 6, "F");
+    doc.setTextColor(255,255,255); doc.setFont("helvetica","normal"); doc.setFontSize(7);
+    doc.text("Tir Gong  —  " + (comp?"Compétition":"Entraînement"), M, 295.5);
+    doc.text("Page "+i+"/"+pageCount, W-M, 295.5, {align:"right"});
+  }
+
+  var fname = "TirGong_"+now.toLocaleDateString("fr-FR").replace(/\//g,"-")+".pdf";
+  doc.save(fname);
+  showMessage("✅ PDF exporté !");
+  haptic(20);
+}
+
 // ── INIT ──
 window.addEventListener("load",function(){setTimeout(function(){document.getElementById("splash").classList.add("hide");},1100);});
 document.addEventListener("DOMContentLoaded",function(){
   setMode("training");setRing(0);updatePhaseCard(-1);updateTireurSwitcher();
   renderSessionScores();renderRanking();renderHistory();
+  updateDiscTrigger();
 });
 </script>
 
+
+<!-- DISCIPLINE SHEET -->
+<div class="sheet-overlay" id="disc-sheet-overlay" onclick="closeDisciplineSheet()"></div>
+<div class="sheet" id="disc-sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <span class="sheet-title">Discipline de tir</span>
+    <button class="sheet-close" onclick="closeDisciplineSheet()">✕</button>
+  </div>
+  <div class="sheet-list" id="disc-sheet-list"></div>
+</div>
 </body>
 </html>
