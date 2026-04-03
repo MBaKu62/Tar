@@ -18,12 +18,20 @@
   <!-- Favicon -->
   <link rel="icon" type="image/png" sizes="32x32" href="/Tar/icons/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/Tar/icons/favicon-16.png">
+
+  <!-- ═══ iOS SPLASH SCREENS ═══ -->
+  <link rel="apple-touch-startup-image" media="screen and (device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)" href="/Tar/icons/splash-1290x2796.png">
+  <link rel="apple-touch-startup-image" media="screen and (device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)" href="/Tar/icons/splash-1179x2556.png">
+  <link rel="apple-touch-startup-image" media="screen and (device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)" href="/Tar/icons/splash-1170x2532.png">
+  <link rel="apple-touch-startup-image" media="screen and (device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)" href="/Tar/icons/splash-1125x2436.png">
+  <link rel="apple-touch-startup-image" media="screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)" href="/Tar/icons/splash-828x1792.png">
+  <link rel="apple-touch-startup-image" media="screen and (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" href="/Tar/icons/splash-750x1334.png">
   <!-- Manifest -->
   <link rel="manifest" href="/Tar/manifest.json">
   <meta name="theme-color" content="#0a84ff">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Tir Gong">
+  <meta name="apple-mobile-web-app-title" content="Tir">
   
   
   
@@ -64,7 +72,7 @@
     @keyframes flashAnim{0%{opacity:0}25%{opacity:1}100%{opacity:0}}
 
     /* NAVBAR */
-    .navbar{height:var(--nav-h);padding:0 16px;display:flex;align-items:center;justify-content:center;
+    .navbar{height:calc(var(--nav-h) + env(safe-area-inset-top));padding:env(safe-area-inset-top) 16px 0;display:flex;align-items:center;justify-content:center;
       background:rgba(0,0,0,.88);backdrop-filter:blur(28px) saturate(2);
       -webkit-backdrop-filter:blur(28px) saturate(2);
       border-bottom:1px solid var(--sep);flex-shrink:0;position:relative;z-index:200}
